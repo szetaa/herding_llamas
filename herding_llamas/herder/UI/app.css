@@ -1,0 +1,63 @@
+pre,
+code {
+    background-color: rgb(109, 109, 109);
+    color: rgb(128, 227, 92);
+    padding: 5px;
+    border-radius: 0px;
+    line-height: 1.2;
+    /* adjust as necessary */
+    font-family: 'Courier New', Courier, monospace;
+    /* optional: sets a monospaced font for the code blocks */
+    white-space: pre-wrap;
+    /* optional: breaks long lines of code to prevent horizontal scrolling */
+    word-wrap: break-word;
+    /* optional: breaks long lines of code to prevent horizontal scrolling */
+}
+
+
+p.humanMessage,
+p.assistantMessage,
+p.errorMessage {
+    border: 1px solid #000;
+    padding: 5px;
+    margin: 5px 0;
+    border-radius: 10px;
+}
+
+p.errorMessage {
+    background-color: #ffae6b;
+}
+
+p.humanMessage {
+    background-color: #c9fbff;
+}
+
+p.assistantMessage {
+    background-color: #f2f2f2;
+}
+
+
+.vote-container {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.btn-vote {
+    color: gray;
+    background-color: transparent;
+    border: none;
+    margin-right: 5px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.btn-vote:hover,
+.btn-vote:focus {
+    color: darkgreen;
+    outline: none;
+}
+
+.btn-vote-selected {
+    color: rgb(173, 222, 255) !important;
+    /* Change the color as you like */
+}

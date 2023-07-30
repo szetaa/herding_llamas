@@ -1,0 +1,21 @@
+admin:
+  allow_nodes:
+    - node_one
+    - node_two
+  allow_api: 
+    - /api/v1/infer
+    - /api/v1/score
+    - /api/v1/feedback
+    - /api/v1/history
+    - /api/v1/switch_model
+  allow_prompt:
+    - llama_2_plain_vanilla
+user:
+  allow_nodes:
+    - node_one
+  allow_api:
+    - /api/v1/infer
+    - /api/v1/score
+    - /api/v1/feedback
+  allow_prompts:
+    - llama_2_plain_vanilla

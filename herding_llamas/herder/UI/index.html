@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Admin Interface</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="lib/font-awesome-5.15.3-all.min.js" rel="stylesheet">
+
+    <link href="app.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container py-1">
+        <div class="tabs">
+            <button class="tablink btn btn-outline-primary" id="tabPrompts">Prompt Engineer</button>
+            <button class="tablink btn btn-outline-primary" id="tabNodes">Nodes</button>
+            <button class="tablink btn btn-outline-primary" id="tabHistory">History</button>
+
+            <div id="viewPrompts" class="tabcontent">
+                <h4>Prompt Engineer</h4>
+                <div id="inputForm" class="d-flex flex-column mt-0">
+                    <textarea id="userInput" class="form-control mb-2" rows="3"
+                        placeholder="Type your message here..."></textarea>
+                    <div class="input-group">
+                        <button id="sendButton" class="btn btn-outline-secondary form-control-lg"
+                            type="button">Send</button>
+                        <div id="loadingSpinner" class="spinner-border text-primary" role="status"
+                            style="display: none;">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <select id="promptSelect" class="form-select form-control-lg">
+                            <!-- Options will be added dynamically -->
+                        </select>
+
+                    </div>
+                </div>
+                <div id="chatWindow" class="mt-5"></div>
+            </div>
+
+            <div id="viewNodes" class="tabcontent">
+                <h4>Nodes</h4>
+                <div class="row">
+                    <div class="col-8">
+                        <div id="model-card-container"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="viewHistory" class="tabcontent">
+                <h4>History</h4>
+                <div id="historyContainer" class="container"></div>
+            </div>
+
+
+        </div>
+
+
+
+
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/marked@3.0.8/marked.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script type="module" src="https://unpkg.com/mustache@latest"></script>
+
+
+    <script type="module" src="app.js"></script>
+</body>
+
+</html>

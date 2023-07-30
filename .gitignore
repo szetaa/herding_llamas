@@ -1,0 +1,8 @@
+dist
+.gitlab-ci_HOLD.yml
+__pycache__
+herder.sqlite
+nohup.out
+.DS_Store
+experiments
+

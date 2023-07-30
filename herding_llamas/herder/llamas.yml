@@ -1,0 +1,12 @@
+node_one:
+  host: localhost
+  port: 8081
+  base_url: http://localhost:8081
+  API_KEY_NAME: llm-key
+  API_KEY: secret123
+node_two:
+  host: localhost
+  port: 8082
+  base_url: http://localhost:8082
+  API_KEY_NAME: llm-key
+  API_KEY: secret123

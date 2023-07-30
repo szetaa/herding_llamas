@@ -1,0 +1,23 @@
+<table class="table table-striped table-hover">
+    <tr>
+        {{#headers}}
+            <th>{{.}}</th>
+        {{/headers}}
+    </tr>
+    {{#data}}
+        <tr>
+            <td>
+                <b>Node</b><br>{{node_key}}<br>
+                <b>Prompt</b><br>{{prompt_key}}<br>
+                <b>Stats</b> (token;time)<br>{{input_tokens}}/{{output_tokens}}; {{elapsed_seconds}}s<br>
+                <b>Created</b><br>{{created_ts}}<br>
+                <b>Updated</b><br>{{updated_ts}}
+            </td>
+            <td>{{raw_input}}</td>
+            <td><pre>{{infer_input}}</pre></td>
+            <td>{{response}}</td>
+            <td>{{score}}</td>
+            <td>{{feedback}}</td>
+        </tr>
+    {{/data}}
+</table>
