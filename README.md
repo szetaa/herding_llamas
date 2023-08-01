@@ -27,25 +27,29 @@ With the ability to map prompts directly to your intended audience, whether this
 ## Prompt engineering
 Admin interface to test and develop new prompts
 
-![Prompt engineer tab](./doc/prompt_engineer_tab.png){width=50%}
+<img src="./doc/prompt_engineer_tab.png" width="50%">
+
 
 *Coming soon: Overwrite default parameters like temperature (measure of creativity), custom stop-words etc.*
 
 ## Llama nodes 
 Monitor the health of all your registered Llama nodes and dynamically switch the loaded model.
-![Nodes tab](./doc/nodes_tab.png){width=50%}
+
+<img src="./doc/nodes_tab.png" width="50%">
 
 *Coming soon: Statistics of requests/tokens processed per hour, heatmap*
 
 ## Request history
 See a history of recent prompts incl. statistics (user waiting time, number of tokens processed etc.).
-![History tab](./doc/history_tab.png){width=75%}
+
+<img src="./doc/history_tab.png" width="75%">
 
 *Coming soon: Users can opt-out on keeping a history of their prompt content.*
 
 ## API exploration
 Interactive exploration, call and test your API directly from the browser
-![API documentation](./doc/swagger_example.png){width=75%}
+
+<img src="./doc/swagger_example.png" width="75%">
 
 # Getting Started
 *Coming soon: `pip install herding-llamas` and **Dockerfiles** for orchestrator and nodes.*
