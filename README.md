@@ -20,7 +20,7 @@ Developing siloed solutions for a growing portfolio of use cases will lead to mi
 
 **Herding-Llamas** is a dynamic and versatile framework designed to serve as the core platform for innovation initiatives intending to utilize open-source LLMs. By offering a single, unified API for prompt engineering and integration into existing applications (or direclty serving a tailored web-UI around its API), Herding-Llamas significantly reduces time and complexity involved in launching a new idea or experimenting with rapidly evolving LLM generations.
 
-With the ability to map prompts directly to your intended audience, whether this is a specific application or user group, and distribute access tokens alongside the API entry point, Herding-Llamas makes it remarkably easy to commence feedback collection.
+With the ability to map prompts directly to your intended audience, whether this is a specific application or user group, and hand out access tokens alongside the API entry point, Herding-Llamas makes it remarkably easy to commence feedback collection.
 
 # Features
 
