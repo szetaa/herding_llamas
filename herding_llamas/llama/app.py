@@ -6,11 +6,13 @@ import yaml
 import pprint
 
 from model import LanguageModel
+from sys_stats import SystemStats
 
 
 class Llama(LanguageModel):
     def __init__(self):
         self.load_conf()
+        self.system_stats = SystemStats()
         LanguageModel.__init__(self)
 
     def load_conf(self):
@@ -45,7 +47,12 @@ async def api_get_models(api_key: str = Depends(get_api_key)):
         {"option": key, "selected": key == llama.loaded_model}
         for key, value in llama.conf["models"].items()
     ]
-    return {"models": _models, "loaded_model": llama.loaded_model}
+    _system_stats = llama.system_stats.collect_system_stats()
+    return {
+        "models": _models,
+        "loaded_model": llama.loaded_model,
+        "system_stats": _system_stats,
+    }
 
 
 @app.post("/api/v1/load_model")
@@ -59,4 +66,11 @@ async def api_load_model(data: dict, api_key: str = Depends(get_api_key)):
 async def api_infer(data: dict, api_key: str = Depends(get_api_key)):
     pprint.pprint(data, width=120)
     _response = llama.infer(data=data)
+    return _response
+
+
+@app.get("/api/v1/system_stats")
+async def api_system_stats(api_key: str = Depends(get_api_key)):
+    _response = llama.system_stats.collect_system_stats()
+    pprint.pprint(_response)
     return _response

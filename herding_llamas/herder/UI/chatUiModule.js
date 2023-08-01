@@ -32,7 +32,8 @@ export default class ChatUI {
         this.modelCardContainer.innerHTML = '';
         for (const nodeId in nodes) {
             const node = nodes[nodeId];
-            const card = this.createCard(node, nodeId);
+            console.log(nodeId)
+            const card = await this.createCard(node, nodeId);
             this.modelCardContainer.appendChild(card);
         }
     }
@@ -65,33 +66,34 @@ export default class ChatUI {
     }
 
 
-    createCard(node, nodeId) {
-        // Create a card for the selected node
-        const card = document.createElement('div');
-        card.className = 'card';
-        const cardBody = document.createElement('div');
-        cardBody.className = 'card-body';
-        card.appendChild(cardBody);
+    async createCard(node, nodeId) {
+        // Fetch the template
+        const response = await fetch('./templates/model_card.mustache');
+        const template = await response.text();
 
-        // Create a div for the node name
-        const nodeName = document.createElement('div');
-        nodeName.textContent = nodeId;  // Replace 'node.key' with the property that contains the node name
-        nodeName.className = 'node-name';  // Add a class for styling if needed
-        cardBody.appendChild(nodeName);
+        // Prepare the data for the template
+        const data = {
+            nodeName: nodeId,
+            models: node.models.map(model => ({
+                name: model.option,
+                selected: model.selected ? 'selected' : ''
+            })),
+            system_stats: node.system_stats
+        };
 
-        // Create a dropdown for the models
-        const select = document.createElement('select');
-        select.className = 'custom-select';
-        for (const model of node.models) {
-            const option = document.createElement('option');
-            option.value = model.option;
-            option.textContent = model.option;
-            option.selected = model.selected;
-            select.appendChild(option);
-        }
-        cardBody.appendChild(select);
+        // Render the template with the data
+        const rendered = Mustache.render(template, data);
+
+        // Create a container element
+        const container = document.createElement('div');
+        container.innerHTML = rendered;
+
+        // Add the event listener to the select element
+        const select = container.querySelector('select');
         select.addEventListener('change', () => this.chatAPI.switchModel(select.value, nodeId));
-        return card;
+
+        // Return the first child of the container (i.e., the card)
+        return container.firstChild;
     }
 
 

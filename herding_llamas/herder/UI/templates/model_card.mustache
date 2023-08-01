@@ -1,0 +1,65 @@
+<div class="card">
+    <div class="card-body">
+        <div class="node-name"><h4>{{nodeName}}</h4></div>
+        Switch model:
+        <select class="custom-select">
+            {{#models}}
+            <option value="{{name}}" {{#selected}}selected{{/selected}}>{{name}}</option>
+            {{/models}}
+        </select>
+<div class="row">
+    <div class="col">
+        <table class="table table-sm sysinfo-table table-borderless">
+            <tbody>
+                <tr><th>CPU Utilization</th><td>{{system_stats.cpu_utilization}}%</td></tr>
+                <tr><th>Disk</th><td>
+                    <div class="progress">
+                        <div class="progress-bar bg-danger" role="progressbar" 
+                            style="width: {{system_stats.disk_pct_used}}%" aria-valuenow="{{system_stats.disk_pct_used}}" 
+                            aria-valuemin="0" aria-valuemax="100" title="Used: {{system_stats.disk_used}} GB"></div>
+                        <div class="progress-bar bg-success" role="progressbar" 
+                            style="width: {{system_stats.disk_pct_free}}%" aria-valuenow="{{system_stats.disk_pct_free}}" 
+                            aria-valuemin="0" aria-valuemax="100" title="Free: {{system_stats.disk_free}} GB"></div>
+                    </div>
+                </td></tr>
+                <tr><th>Memory (non GPU)</th><td>
+                    <div class="progress">
+                        <div class="progress-bar bg-danger" role="progressbar" 
+                            style="width: {{system_stats.memory_pct_used}}%" aria-valuenow="{{system_stats.memory_pct_used}}" 
+                            aria-valuemin="0" aria-valuemax="100" title="Used: {{system_stats.memory_used}} GB"></div>
+                        <div class="progress-bar bg-success" role="progressbar" 
+                            style="width: {{system_stats.memory_pct_free}}%" aria-valuenow="{{system_stats.memory_pct_free}}" 
+                            aria-valuemin="0" aria-valuemax="100" title="Free: {{system_stats.memory_free}} GB"></div>
+                    </div>
+                </td></tr>
+                <tr><th>Swap Usage</th><td>{{system_stats.swap_usage}} GB</td></tr>
+                <tr><th>System Load</th><td>{{system_stats.system_load}}</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="col">
+        <table class="table table-sm sysinfo-table table-borderless">
+            <tbody>
+            {{#system_stats.gpu_info}}
+                <tr><th>GPU Name</th><td>{{gpu_name}}</td></tr>
+                <tr><th>GPU Memory</th><td>{{total}} GB</td></tr>
+                <tr><th>GPU Usage</th><td>
+                    <div class="progress">
+                        <div class="progress-bar bg-danger" role="progressbar" 
+                            style="width: {{gpu_pct_used}}%" aria-valuenow="{{gpu_pct_used}}" 
+                            aria-valuemin="0" aria-valuemax="100" title="Used: {{used}} GB"></div>
+                        <div class="progress-bar bg-success" role="progressbar" 
+                            style="width: {{gpu_pct_free}}%" aria-valuenow="{{gpu_pct_free}}" 
+                            aria-valuemin="0" aria-valuemax="100" title="Free: {{free}} GB"></div>
+                    </div>
+                </td></tr>
+                <tr><th>Reserved</th><td>{{reserved}} GB</td></tr>
+            {{/system_stats.gpu_info}}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+    </div>
+</div>

@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<!DOCTYPE nvidia_smi_log SYSTEM "nvsmi_device_v12.dtd">
+<nvidia_smi_log>
+    <attached_gpus>1</attached_gpus>
+	<gpu id="00000000:01:00.0">
+	
+		<product_name>NVIDIA GeForce GTX 1080 Ti (placeholder!)</product_name>
+		<fb_memory_usage>
+			<total>11264 MiB</total>
+			<reserved>93 MiB</reserved>
+			<used>9316 MiB</used>
+			<free>1854 MiB</free>
+		</fb_memory_usage>
+	</gpu>
+</nvidia_smi_log>

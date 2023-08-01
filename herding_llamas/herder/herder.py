@@ -24,19 +24,27 @@ class Herder:
                 _models = requests.get(_url, headers=_headers)
                 self.llamas[_llama]["models"] = _models.json()["models"]
                 self.llamas[_llama]["loaded_model"] = _models.json()["loaded_model"]
-            except:
+                self.llamas[_llama]["system_stats"] = _models.json().get(
+                    "system_stats", {}
+                )
+            except Exception as e:
+                print(f"Error: Could not fetch: {e}")
                 self.llamas[_llama]["models"] = [{"option": "offline?"}]
                 self.llamas[_llama]["loaded_model"] = "offline?"
+                self.llamas[_llama]["system_stats"] = {}
+        pprint.pprint(self.llamas)
 
     def switch_model(self, data: dict):
-        print("CONF", self.conf, type(self.conf))
-        print("DATA", data, type(data))
         _url = f"{self.conf[data['node_key']]['base_url']}/api/v1/load_model"
-        print("URL", _url)
         _headers = self.get_header(data["node_key"])
-        print("HEAD", _headers)
         _response = requests.post(url=_url, headers=_headers, data=json.dumps(data))
         return _response
+
+    # def collect_system_stats(self, data: dict):
+    #     _url = f"{self.conf[data['node_key']]['base_url']}/api/v1/system_stats"
+    #     _headers = self.get_header(data["node_key"])
+    #     _response = requests.get(url=_url, headers=_headers)
+    #     return _response
 
     def infer(self, data: dict):
         if data.get("prompt_key") is not None:

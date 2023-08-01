@@ -87,15 +87,23 @@ async def api_get_prompts():
 @app.post("/api/v1/infer", dependencies=[Depends(authorize)])
 async def api_post_infer(data: dict):
     """
-    Trigger inference of a user input and send it to the orchestrator for distribution to relevant available llama instances.
+    Process inference of a user request.
 
-    This function takes a user's input data, sends it to the orchestrator to
-    perform inference on it, and then retrieves and returns the response
-    from the orchestrator.
-    the inference ID is used to provide feedback to a given request (scoring).
+    This function takes a user's input data, embeds it inside the chosen prompt (model-specific system / instruction messages),
+    selects relevant instance among the registered llama-nodes (which can handle the prompt type) and sends it through a trusted
+    channel to trigger downstream inference. Authorization and logging (incl. node statistics) will be handled centrally
+    by the orchestrator.
+    The generated inference ID allows to collect feedback to a given request (scoring).
 
     Args:
         data (dict): The user's input data for inference.
+
+        Format:
+        {
+            'infer_input':  <raw request>,
+            'prompt_key':   <key from prompt store>,
+            'param':        <Optional overwrite of generation parameter like temperature or max output tokens>
+        }
 
     Returns:
         dict: A dictionary containing the inference result text and the inference ID.

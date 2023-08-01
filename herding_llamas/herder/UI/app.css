@@ -14,6 +14,10 @@ code {
     /* optional: breaks long lines of code to prevent horizontal scrolling */
 }
 
+.sysinfo-table {
+    font-size: 0.7rem;
+    padding: 0;
+}
 
 p.humanMessage,
 p.assistantMessage,
