@@ -1,6 +1,6 @@
 # Herding Llamas
 
-A modern framework as scalable API backend to develop and serve diverse LLM applications across your organization.
+A scalable API framework for orchestrating prompt-engineered solutions involving Large Language Models (LLMs), aiming to lower the entry hurdle for experimentation across teams while cutting time and complexity involved in launching (and integrating) a new idea.
 # Introduction
 ## Vision
 - Build your own farm of multiple **Large Language Models** *(LLM)*
