@@ -8,6 +8,8 @@ from sqlalchemy import (
     DateTime,
     func,
     desc,
+    cast,
+    text,
 )
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -79,3 +81,50 @@ class Database:
                 setattr(inference, key, value)
 
         session.commit()
+
+    def get_node_statistics(self, hours=24):
+        session = self.Session()
+
+        twenty_four_hours_ago = text(f"(datetime('now', '-{hours} hours'))")
+
+        results = (
+            session.query(
+                Inference.node_key,
+                (
+                    cast(
+                        func.strftime("%Y-%m-%d %H:00:00", Inference.created_ts), String
+                    )
+                ).label("hour"),
+                func.count(Inference.id).label("record_count"),
+                func.avg(Inference.input_tokens).label("average_input_tokens"),
+                func.sum(Inference.input_tokens).label("sum_input_tokens"),
+                func.avg(Inference.output_tokens).label("average_output_tokens"),
+                func.sum(Inference.output_tokens).label("sum_output_tokens"),
+                func.avg(Inference.elapsed_seconds).label("average_elapsed_seconds"),
+                func.sum(Inference.elapsed_seconds).label("sum_elapsed_seconds"),
+            )
+            .filter(Inference.created_ts >= twenty_four_hours_ago)
+            .group_by(Inference.node_key, "hour")
+            .order_by(Inference.node_key, "hour")
+            .all()
+        )
+
+        data = {}
+        hours_in_seconds = 60 * 60 * hours
+
+        for row in results:
+            data[row[0]] = {
+                "node_key": row[0],
+                "hour": row[1],
+                "record_count": row[2],
+                "average_input_tokens": row[3],
+                "sum_input_tokens": row[4],
+                "average_output_tokens": row[5],
+                "sum_output_tokens": row[6],
+                "average_elapsed_seconds": round(row[7], 2),
+                "sum_elapsed_seconds": round(row[8], 2),
+                "pct_used_seconds": (row[8] / (hours_in_seconds)) * 100,
+                "pct_unused_seconds": (1 - row[8] / (hours_in_seconds)) * 100,
+            }
+
+        return data

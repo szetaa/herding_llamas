@@ -8,13 +8,17 @@ import json
 
 from herder import Herder
 
-herder = Herder()
-
-logging.basicConfig(level=logging.INFO)
-
 app = FastAPI()
 
-app.mount("/UI", StaticFiles(directory="UI"), name="UI")
+
+async def startup():
+    logging.basicConfig(level=logging.INFO)
+    global herder
+    herder = await Herder.create()
+    app.mount("/UI", StaticFiles(directory="UI"), name="UI")
+
+
+app.add_event_handler("startup", startup)
 
 
 async def authorize(request: Request):
@@ -53,7 +57,7 @@ async def api_get_llamas():
         HTTPException: If the user is not authorized to access this endpoint.
 
     """
-    herder.load_llamas()
+    await herder.load_llamas()
     return herder.llamas
 
 
@@ -112,7 +116,7 @@ async def api_post_infer(data: dict):
         HTTPException: If the user is not authorized to access this endpoint.
 
     """
-    response, inference_id = herder.infer(data)
+    response, inference_id = await herder.infer(data)
     response_data = {"text": response.json()["response"], "inference_id": inference_id}
     return response_data
 
@@ -207,5 +211,5 @@ async def api_switch_model(data: dict):
     Raises:
         HTTPException: If the user is not authorized to access this endpoint.
     """
-    response = herder.switch_model(data)
+    response = await herder.switch_model(data)
     return response.json()

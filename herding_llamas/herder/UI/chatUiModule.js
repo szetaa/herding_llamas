@@ -33,6 +33,7 @@ export default class ChatUI {
         for (const nodeId in nodes) {
             const node = nodes[nodeId];
             console.log(nodeId)
+            console.log(node)
             const card = await this.createCard(node, nodeId);
             this.modelCardContainer.appendChild(card);
         }
@@ -78,7 +79,8 @@ export default class ChatUI {
                 name: model.option,
                 selected: model.selected ? 'selected' : ''
             })),
-            system_stats: node.system_stats
+            system_stats: node.system_stats,
+            infer_stats: node.infer_stats,
         };
 
         // Render the template with the data

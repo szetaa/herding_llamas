@@ -10,6 +10,31 @@
 <div class="row">
     <div class="col">
         <table class="table table-sm sysinfo-table table-borderless">
+            <tr><th>24h requests</th><td>{{infer_stats.record_count}}</td></tr>
+            <tr><th>24h input tokens</th><td>{{infer_stats.sum_input_tokens}}</td></tr>
+            <tr><th>24h output tokens</th><td>{{infer_stats.sum_output_tokens}}</td></tr>
+        </table>
+    </div>
+    <div class="col">
+        <table class="table table-sm sysinfo-table table-borderless">
+            <tr><th>24h Utility</th><td>
+                <div class="progress">
+                    <div class="progress-bar bg-danger" role="progressbar" 
+                        style="width: {{infer_stats.pct_used_seconds}}%" aria-valuenow="{{infer_stats.pct_used_seconds}}" 
+                        aria-valuemin="0" aria-valuemax="100" title="Used: {{infer_stats.sum_elapsed_seconds}} GB"></div>
+                    <div class="progress-bar bg-success" role="progressbar" 
+                        style="width: {{infer_stats.pct_unused_seconds}}%" aria-valuenow="{{infer_stats.pct_unused_seconds}}" 
+                        aria-valuemin="0" aria-valuemax="100" ></div>
+                </div>            
+            </td></tr>
+            <tr><th>24h elapsed time</th><td>{{infer_stats.sum_elapsed_seconds}} sec</td></tr>
+            <tr><th>24h average time per request</th><td>{{infer_stats.average_elapsed_seconds}} sec</td></tr>
+        </table>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <table class="table table-sm sysinfo-table table-borderless">
             <tbody>
                 <tr><th>CPU Utilization</th><td>{{system_stats.cpu_utilization}}%</td></tr>
                 <tr><th>Disk</th><td>
@@ -42,8 +67,7 @@
             <tbody>
             {{#system_stats.gpu_info}}
                 <tr><th>GPU Name</th><td>{{gpu_name}}</td></tr>
-                <tr><th>GPU Memory</th><td>{{total}} GB</td></tr>
-                <tr><th>GPU Usage</th><td>
+                <tr><th>Use of {{total}} GB</th><td>
                     <div class="progress">
                         <div class="progress-bar bg-danger" role="progressbar" 
                             style="width: {{gpu_pct_used}}%" aria-valuenow="{{gpu_pct_used}}" 

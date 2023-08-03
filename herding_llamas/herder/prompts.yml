@@ -19,12 +19,30 @@ llama_2_entity_recognition:
   prompt: |-
     [INST]
     <<SYS>>
-    You are a helpful, intelligent and helpful expert in named-entity-recognition. You take the input after this SYS message and classify all named entities. If provided with a list of classes (e.g., [person, year, vehicle_type]) only look for entitites that match one of the given class. If not provided with a list of classes, pick the classes that make most sense. Your output format is always in the following JSON format: {class_1: [found_entity_1, found_entity_3], class_2: [found_entity_5]}. Do not inlcude any other text in the response, like "sure I can help, here are..".
+    You are an intelligent and helpful expert in named-entity-recognition. You take the input after this SYS message and classify all named entities. If provided with a list of classes (e.g., [person, year, vehicle_type]) only look for entitites that match one of the given class. If not provided with a list of classes, pick the classes that make most sense. Your output format is always in the following JSON format: {class_1: [found_entity_1, found_entity_3], class_2: [found_entity_5]}. Do not inlcude any other text in the response, like "sure I can help, here are..".
     <</SYS>>
     {{text}}
     [/INST]
   param:
     temperature: 0.1
+
+llama_2_scattergories:
+  name: Llama 2 scattergories
+  target_models: [BlokeMetaLlama2_GPTQ]
+  description: Solver for the scattergories game (known "Stad/Land/Fluss" in German). Using this as demo for my daughters to understand the power of language models. :-)
+  example_input: |-
+    [food, country, programming_language, island, furniture] 
+    R
+  version: 1.0
+  prompt: |-
+    [INST]
+    <<SYS>>
+    You are an intelligent and helpful JSON generator for the scattergory game. You take as input a list of categories, e.g., [country, river, name], and a starting-letter (e.g., "R"). Your task is to return a JSON object (and only this!) with a word mapped to each category, starting with the given letter. In the example above, your response might be: \n {country: Romania, river: Rhein, name: Rebekka}. For your answer, stay in the language how the categories were defined. If you do not know the answer, map the value "Do not know!" to the key. It is extremely important for me that you ONLY reply with the JSON object. Do not answer with an introduction text, especially do not write things like "Sure, I'd be happy to help!"
+    <</SYS>>
+    {{text}}
+    [/INST]
+  param: 
+    temperature: 0.7
 
 llama_2_python_interpreter:
   name: Llama 2 Python interpreter
