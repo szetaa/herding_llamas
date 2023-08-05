@@ -3,6 +3,7 @@ import pprint
 import requests
 import httpx
 import json
+from urllib.parse import urlparse
 
 from prompter import Prompter
 from database import Database
@@ -10,6 +11,8 @@ from database import Database
 
 class Herder:
     def __init__(self, prompter, database):
+        self.load_users()
+        self.load_roles()
         self.prompter = prompter
         self.database = database
 
@@ -22,12 +25,51 @@ class Herder:
         await herder.load_llamas()
         return herder
 
+    def load_users(self):
+        with open("users.yml", "r") as f:
+            self.users = yaml.safe_load(f)
+
+    def load_roles(self):
+        with open("roles.yml", "r") as f:
+            self.roles = yaml.safe_load(f)
+
+    def authorize(self, user, prompt_key=None, api_path=None):
+        # check API path allowed
+        if api_path not in self.roles[user.role]["allow_api_paths"]:
+            return {
+                "authorized": False,
+                "message": f"Unauthorized request: {api_path} for user role: {user.role}",
+            }
+        # check prompt allowed?
+        if (
+            prompt_key is not None
+            and prompt_key not in self.roles[user.role]["allow_prompts"]
+        ):
+            return {
+                "authorized": False,
+                "message": f"Unauthorized prompt: {prompt_key} for user role: {user.role}",
+            }
+        # check node allowed? - not necessary here, filter on allowed nodes in _candidates.
+
+        # check if any user limits reached
+        for limit in user.limit:
+            # LIMIT {'type': 'request', 'interval': 1, 'limit': 5}
+            # ACTUAL: {'request_count': 18, 'sum_input_tokens': 2448, 'sum_output_tokens': 2736, 'sum_elapsed_seconds': 107.15386891365051, 'total_tokens': 5184}
+            actual = self.database.get_user_statistics(user.user_key, limit["interval"])
+            if actual[limit["type"]] >= limit["limit"]:
+                return {
+                    "authorized": False,
+                    "message": f"Limit reached: {limit['type']} ({actual[limit['type']]}>={limit['limit']}) in last {limit['interval']}h for user: {user.user_key}",
+                }
+
+        # Finally
+        return {"authorized": True}
+
     async def load_llamas(self):
         with open("llamas.yml") as f:
             self.conf = yaml.safe_load(f)
         self.llamas = self.conf
         _llama_stats = self.database.get_node_statistics()
-        pprint.pprint(_llama_stats)
         for _llama in self.llamas.copy():
             try:
                 _url = f"{self.conf[_llama]['base_url']}/api/v1/models"
@@ -40,15 +82,12 @@ class Herder:
                 self.llamas[_llama]["system_stats"] = _models.json().get(
                     "system_stats", {}
                 )
-                print("ASDFFFFFF")
-                pprint.pprint(_llama_stats.get(_llama, {}))
                 self.llamas[_llama]["infer_stats"] = _llama_stats.get(_llama, {})
             except Exception as e:
                 print(f"Error: Could not fetch '{_llama}': {e}")
                 self.llamas[_llama]["models"] = [{"option": "offline?"}]
                 self.llamas[_llama]["loaded_model"] = "offline?"
                 self.llamas[_llama]["system_stats"] = {}
-        # pprint.pprint(self.llamas)
 
     async def switch_model(self, data: dict):
         _url = f"{self.conf[data['node_key']]['base_url']}/api/v1/load_model"
@@ -89,13 +128,11 @@ class Herder:
                 response = await client.post(
                     url=_url, headers=_headers, data=json.dumps(data)
                 )
-            pprint.pprint(response)
 
-            # response = requests.post(url=_url, headers=_headers, data=json.dumps(data))
         else:
             response = json.dumps({"response": "EXCEPTION: Backend not available!"})
-        print("RES", response.json())
         db_inference_record = {
+            "user_key": data.get("user_key", "unknown"),
             "node_key": _node_key,
             "prompt_key": data.get("prompt_key", "unknown"),
             "prompt_version": "TBD",

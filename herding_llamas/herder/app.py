@@ -1,12 +1,23 @@
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, status, Response
+from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
+
 from starlette.requests import Request
+from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
+
+from typing import Optional
+from functools import wraps
+
 import logging
 import yaml
 import requests
 import json
 
 from herder import Herder
+
 
 app = FastAPI()
 
@@ -21,26 +32,103 @@ async def startup():
 app.add_event_handler("startup", startup)
 
 
-async def authorize(request: Request):
-    pass
-    ## Example to check block of not allowed prompts
-    ## TOOD: Implement role/license based permission model
-    # try:
-    #     request_json = await request.json()
-    #     target_prompt = request_json["prompt_key"]
-    # except Exception as e:
-    #     target_prompt = None
-    # if target_prompt not in [None, "llama_2_keep_it_short"]:
-    #     print("EXCEPT")
-    #     raise HTTPException(
-    #         status_code=status.HTTP_403_FORBIDDEN,
-    #         detail=f"Not licensed for prompt '{target_prompt}'",
-    #     )
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+
+# class BodyMiddleware(BaseHTTPMiddleware):
+#     async def dispatch(self, request, call_next):
+#         if request.method == "POST":
+#             body = await request.body()
+#             request.state.body = json.loads(body)
+#         response = await call_next(request)
+#         return response
+
+# app.add_middleware(BodyMiddleware)
+
+
+class User(BaseModel):
+    user_key: str
+    name: str
+    role: str
+    limit: list
+
+
+def authenticate_token(token: str = Depends(oauth2_scheme)):
+    for user_key, user_data in herder.users.items():
+        if user_data["token"] == token:
+            _user = User(
+                user_key=user_key,
+                name=user_data["name"],
+                role=user_data["role"],
+                limit=user_data.get("limit", []),
+            )
+            return _user
+    # if no user matches the token, raise an exception
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid authentication credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+
+async def authorize_token(
+    user,
+    prompt_key=None,
+    api_path=None,
+):
+    authorized = herder.authorize(user=user, prompt_key=prompt_key, api_path=api_path)
+    if authorized["authorized"]:
+        return user
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=authorized["message"],
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+from functools import wraps
+
+
+def authorize_endpoint(func):
+    # Create decorator for authorization of API entry points.
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        # Extracting request and data from the arguments
+        request = kwargs.get("request")
+        data = kwargs.get("data", {})
+
+        token = await oauth2_scheme(request)
+
+        # Authenticate
+        user = authenticate_token(token)
+
+        request.state.user = user
+
+        # Authorize
+        await authorize_token(
+            user=user,
+            api_path=request.url.path,
+            prompt_key=data.get("prompt_key", None),
+        )
+
+        # If authorized, continue processing the original function
+        return await func(*args, **kwargs)
+
+    return wrapper
+
+
+@app.get("/api/v1/allowed_tabs")
+@authorize_endpoint
+async def api_allowed_tabs(request: Request):
+    allowed_tabs = herder.roles[request.state.user.user_key]["allow_tabs"]
+    return allowed_tabs
 
 
 # Orchestrator requests
-@app.get("/api/v1/llamas", dependencies=[Depends(authorize)])
-async def api_get_llamas():
+@app.get("/api/v1/llamas")
+@authorize_endpoint
+async def api_get_llamas(request: Request):
     """
     Get a list of connected large language model instances (llamas).
 
@@ -61,8 +149,9 @@ async def api_get_llamas():
     return herder.llamas
 
 
-@app.get("/api/v1/prompts", dependencies=[Depends(authorize)])
-async def api_get_prompts():
+@app.get("/api/v1/prompts")
+@authorize_endpoint
+async def api_get_prompts(request: Request):
     """
     Get a list of configured prompts available on connected llamas.
 
@@ -88,8 +177,9 @@ async def api_get_prompts():
     return {"prompts": _prompts}
 
 
-@app.post("/api/v1/infer", dependencies=[Depends(authorize)])
-async def api_post_infer(data: dict):
+@app.post("/api/v1/infer")
+@authorize_endpoint
+async def api_post_infer(request: Request, data: dict):
     """
     Process inference of a user request.
 
@@ -116,13 +206,15 @@ async def api_post_infer(data: dict):
         HTTPException: If the user is not authorized to access this endpoint.
 
     """
+    data["user_key"] = request.state.user.user_key
     response, inference_id = await herder.infer(data)
     response_data = {"text": response.json()["response"], "inference_id": inference_id}
     return response_data
 
 
-@app.post("/api/v1/score", dependencies=[Depends(authorize)])
-async def api_score(data: dict):
+@app.post("/api/v1/score")
+@authorize_endpoint
+async def api_score(request: Request, data: dict):
     """
     Provide feedback in the form of scoring (1-5 stars) on a given response.
 
@@ -144,8 +236,9 @@ async def api_score(data: dict):
     herder.database.update_inference(data["inference_id"], data)
 
 
-@app.post("/api/v1/feedback", dependencies=[Depends(authorize)])
-async def api_feedback(data: dict):
+@app.post("/api/v1/feedback")
+@authorize_endpoint
+async def api_feedback(request: Request, data: dict):
     """
     Provide written feedback (comments) on a given response.
 
@@ -167,8 +260,9 @@ async def api_feedback(data: dict):
     herder.database.update_inference(data["inference_id"], data)
 
 
-@app.get("/api/v1/history", dependencies=[Depends(authorize)])
-async def api_get_history():
+@app.get("/api/v1/history")
+@authorize_endpoint
+async def api_get_history(request: Request):
     """
     Fetch the history of recent requests.
 
@@ -191,8 +285,9 @@ async def api_get_history():
     return history
 
 
-@app.post("/api/v1/switch_model", dependencies=[Depends(authorize)])
-async def api_switch_model(data: dict):
+@app.post("/api/v1/switch_model")
+@authorize_endpoint
+async def api_switch_model(request: Request, data: dict):
     """
     Switch the loaded model on a given node.
 

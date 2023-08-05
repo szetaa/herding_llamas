@@ -19,6 +19,12 @@ code {
     padding: 0;
 }
 
+#tabPrompts,
+#tabNodes,
+#tabHistory {
+    display: none;
+}
+
 p.humanMessage,
 p.assistantMessage,
 p.errorMessage {

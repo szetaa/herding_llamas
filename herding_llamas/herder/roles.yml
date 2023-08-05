@@ -2,20 +2,35 @@ admin:
   allow_nodes:
     - node_one
     - node_two
-  allow_api: 
+  allow_api_paths: 
     - /api/v1/infer
     - /api/v1/score
+    - /api/v1/llamas
+    - /api/v1/prompts
     - /api/v1/feedback
     - /api/v1/history
     - /api/v1/switch_model
-  allow_prompt:
-    - llama_2_plain_vanilla
-user:
-  allow_nodes:
-    - node_one
-  allow_api:
-    - /api/v1/infer
-    - /api/v1/score
-    - /api/v1/feedback
+    - /api/v1/allowed_tabs
   allow_prompts:
     - llama_2_plain_vanilla
+    - llama_2_keep_it_short
+  allow_tabs:
+    - Prompts
+    - Nodes
+    - History
+    - OwnHistory
+user_group:
+  allow_nodes:
+    - node_one
+  allow_api_paths:
+    - /api/v1/infer
+    - /api/v1/prompts
+    - /api/v1/score
+    - /api/v1/feedback
+    - /api/v1/allowed_tabs
+  allow_prompts:
+    - llama_2_keep_it_short
+    - llama_2_plain_vanilla
+  allow_tabs:
+    - Prompts
+    - OwnHistory

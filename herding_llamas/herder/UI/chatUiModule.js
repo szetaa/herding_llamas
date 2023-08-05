@@ -23,6 +23,7 @@ export default class ChatUI {
         this.listenToMessages();
     }
 
+
     async populateNodesDropdown() {
         const nodes = await this.chatAPI.fetchNodes();
         this.populateModelCards(nodes);
@@ -32,8 +33,6 @@ export default class ChatUI {
         this.modelCardContainer.innerHTML = '';
         for (const nodeId in nodes) {
             const node = nodes[nodeId];
-            console.log(nodeId)
-            console.log(node)
             const card = await this.createCard(node, nodeId);
             this.modelCardContainer.appendChild(card);
         }
@@ -49,20 +48,20 @@ export default class ChatUI {
     }
 
 
-    setupTabs() {
-        document.getElementById('tabNodes').addEventListener('click', () => {
-            this.openTab('viewNodes')
-            this.populateNodesDropdown();
+    async setupTabs() {
+        const allowedTabs = await this.chatAPI.fetchAllowedTabs()
 
+        allowedTabs.forEach(tab => {
+            document.getElementById(`tab${tab}`).style.display = 'inline-block'
+            document.getElementById(`tab${tab}`).addEventListener('click', () => {
+                this.openTab(`view${tab}`)
+                tab == 'Prompt' && this.populatePromptsDropdown()
+                tab == 'Nodes' && this.populateNodesDropdown()
+                tab == 'History' && this.populateHistory()
+                tab == 'OwnHistory' && this.populateHistory()
+            })
         })
-        document.getElementById('tabPrompts').addEventListener('click', () => {
-            this.openTab('viewPrompts')
-            this.populatePromptsDropdown();
-        })
-        document.getElementById('tabHistory').addEventListener('click', () => {
-            this.openTab('viewHistory')
-            this.populateHistory()
-        })
+
         document.getElementById('tabPrompts').click();
     }
 
@@ -98,11 +97,6 @@ export default class ChatUI {
         return container.firstChild;
     }
 
-
-    // async switchModel(model_key, node_key) {
-    //     const response = await this.chatAPI.switchModel(model_key, node_key);
-    //     console.log(response);
-    // }
 
     async populatePromptsDropdown() {
         const data = await this.chatAPI.getPrompts();
@@ -148,27 +142,20 @@ export default class ChatUI {
             const message = this.userInput.value;
             const prompt_key = this.promptSelect.value;
             this.appendHumanMessage(message);
-            this.loadingSpinner.title = "Waiting for LLM response.."
+            this.loadingSpinner.title = "Waiting for LLM response..";
             this.loadingSpinner.style.display = 'block';
-            const response = await this.chatAPI.postMessage(message, prompt_key);
-            if (response.status === 403) {
-                const errorData = await response.json();
+            try {
+                const responseData = await this.chatAPI.postMessage(message, prompt_key);
                 this.loadingSpinner.style.display = 'none';
-                this.appendErrorMessage(errorData.detail);
-                return;
-            }
-            if (!response.ok) {
-                //const errorData = await response.json();
+                this.appendAssistantMessage(responseData['text'], responseData['inference_id']);
+                this.clearInput();
+            } catch (error) {
                 this.loadingSpinner.style.display = 'none';
-                this.appendErrorMessage("Invalid response");
-                return;
+                this.appendErrorMessage(error.message);
             }
-            const responseData = await response.json()
-            this.loadingSpinner.style.display = 'none';
-            this.appendAssistantMessage(responseData['text'], responseData['inference_id']);
-            this.clearInput();
         });
     }
+
 
     appendErrorMessage(message) {
         const messageElement = document.createElement('p');
@@ -188,7 +175,6 @@ export default class ChatUI {
     async appendAssistantMessage(message, inference_id) {
         const messageElement = document.createElement('p');
         messageElement.classList = "assistantMessage";
-        console.log('INF:', inference_id)
         messageElement.innerHTML = message;
 
         const starContainer = document.createElement('div');
@@ -247,7 +233,6 @@ export default class ChatUI {
 
         // Attach event listener to the form
         document.getElementById(`form${inference_id}`).addEventListener('submit', (event) => {
-            console.log('clicked')
             event.preventDefault();
             const feedback = document.getElementById(`feedback${inference_id}`).value;
             this.sendFeedback(inference_id, feedback);
