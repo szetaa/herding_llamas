@@ -19,18 +19,18 @@ admin:
     - Nodes
     - History
     - OwnHistory
-user_group:
-  allow_nodes:
-    - node_one
-  allow_api_paths:
-    - /api/v1/infer
-    - /api/v1/prompts
-    - /api/v1/score
-    - /api/v1/feedback
-    - /api/v1/allowed_tabs
-  allow_prompts:
-    - llama_2_keep_it_short
-    - llama_2_plain_vanilla
-  allow_tabs:
-    - Prompts
-    - OwnHistory
+  user_group_A:
+    allow_nodes:
+      - node_one
+    allow_api_paths:
+      - /api/v1/infer
+      - /api/v1/prompts
+      - /api/v1/score
+      - /api/v1/feedback
+      - /api/v1/allowed_tabs
+    allow_prompts:
+      - llama_2_keep_it_short
+      - llama_2_plain_vanilla
+    allow_tabs:
+      - Prompts
+      - OwnHistory

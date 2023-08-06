@@ -5,10 +5,10 @@ admin:
 user_a:
   token: user_token # only for demo, 
   limit: 
-    - type: request
+    - type: request # Limit number of requests for a given time interval
       interval: 1 # hours
       limit: 20 # max 5 requests per hour
-    - type: token
+    - type: token # Limit number of tokens processed for a given time interval
       interval: 1 # hours
       limit: 6000 # max 1000 tokens (in+out) per hour
   name: User A
