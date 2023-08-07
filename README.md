@@ -2,6 +2,11 @@
 
 A scalable API framework for orchestrating prompt-engineered solutions involving Large Language Models (LLMs), aiming to lower the entry hurdle for experimentation across teams while cutting time and complexity involved in launching (and integrating) a new idea.
 
+***Recent updates***
+- *[8-Aug-2023]* **Task queue** added for LLM inference. Only workers (registered Llama nodes) in the allow-list of the requestor can pick up the task.
+- *[6-Aug-2023]* **Allow to set limits**. E.g., restrict access to some Llama nodes to a user group, or based on max requests / processed input/output tokens over a given time window.
+
+
 # Introduction
 ## Vision
 - Build and orchestrate your own pool **Large Language Models** *(LLM)*
@@ -131,13 +136,14 @@ Interactive exploration, call and test your API directly from the browser
 1. Register your nodes in [llamas.yml](./herding_llamas/herder/llamas.yml)
 1. Run `./herding_llamas/herder/startup.sh` (change the `port` if needed)
 
+
 # Roadmap
-- Add user and licensing model
-  - Allow-list for prompts and nodes
-  - Set limits per user (number of requests/tokens per hour)
-- Dynamically switch models on nodes, based on observed demand
-- Queuing mechanism for requests
-- Improve error handling and logging
-- Allow to add modules / plugins (e.g., personal vector stores / chat with your data, reasoning, ...)
+- [x] Add user and licensing model
+  - [x] Allow-list for prompts and nodes
+  - [x] Set limits per user (number of requests/tokens per hour)
+- [ ] Dynamically switch models on nodes, based on observed demand
+- [x] Queuing mechanism for requests
+- [ ] Improve error handling and logging
+- [ ] Allow to add modules / plugins (e.g., personal vector stores / chat with your data, reasoning, ...)
 
 As this project is still in earl stage, the roadmap will likley be subject to frequent change.
