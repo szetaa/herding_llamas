@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, status, Response
+from fastapi import FastAPI, Depends, HTTPException, status, Response, BackgroundTasks
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
@@ -22,28 +22,20 @@ from herder import Herder
 app = FastAPI()
 
 
+herder: Herder
+
+
+@app.on_event("startup")
 async def startup():
     logging.basicConfig(level=logging.INFO)
     global herder
     herder = await Herder.create()
     app.mount("/UI", StaticFiles(directory="UI"), name="UI")
-
-
-app.add_event_handler("startup", startup)
+    # background_tasks = BackgroundTasks()
+    # background_tasks.add_task(herder.refresh)  # Start the refresh loop
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-
-# class BodyMiddleware(BaseHTTPMiddleware):
-#     async def dispatch(self, request, call_next):
-#         if request.method == "POST":
-#             body = await request.body()
-#             request.state.body = json.loads(body)
-#         response = await call_next(request)
-#         return response
-
-# app.add_middleware(BodyMiddleware)
 
 
 class User(BaseModel):
@@ -207,9 +199,20 @@ async def api_post_infer(request: Request, data: dict):
 
     """
     data["user_key"] = request.state.user.user_key
-    response, inference_id = await herder.infer(data)
-    response_data = {"text": response.json()["response"], "inference_id": inference_id}
-    return response_data
+    response, inference_id, status_code = await herder.infer(data)
+
+    if status_code == 200:
+        response_data = {
+            "text": response.json()["response"],
+            "inference_id": inference_id,
+        }
+        return response_data
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=response["message"],
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 
 @app.post("/api/v1/score")

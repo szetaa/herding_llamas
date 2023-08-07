@@ -2,6 +2,7 @@ admin:
   token: admin_token
   name: Admin
   role: admin
+  opt_out_history_content: false
 user_a:
   token: user_token # only for demo, 
   limit: 
@@ -13,3 +14,4 @@ user_a:
       limit: 6000 # max 1000 tokens (in+out) per hour
   name: User A
   role: user_group
+  opt_out_history_content: false
