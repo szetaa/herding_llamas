@@ -17,6 +17,7 @@ class Herder:
         self.load_roles()
         self.prompter = prompter
         self.database = database
+        self.workers = {}
         self.task_queue = task_queue
 
     # async classmethod to serve as an alternative constructor.
@@ -103,6 +104,23 @@ class Herder:
                 self.llamas[_llama]["system_stats"] = {}
                 self.llamas[_llama]["infer_stats"] = {}
                 self.llamas[_llama]["mapped_prompts"] = []
+        return self.llamas
+
+    async def start_worker(self, worker_id, skills):
+        if worker_id in self.workers:
+            self.stop_worker(worker_id)
+        task = asyncio.create_task(
+            Worker(
+                worker_id=worker_id, task_queue=self.task_queue, skills=skills
+            ).start()
+        )
+        self.workers[worker_id] = task
+
+    async def stop_worker(self, worker_id):
+        task = self.workers.get(worker_id)
+        if task:
+            task.cancel()
+            del self.workers[worker_id]
 
     async def start_workers(self):
         _workers_created = []
@@ -110,14 +128,13 @@ class Herder:
         for _llama, value in self.llamas.items():
             if len(value.get("mapped_prompts", [])) > 0:
                 _skills = value["mapped_prompts"]
-                asyncio.create_task(
-                    Worker(
-                        worker_id=_llama, task_queue=self.task_queue, skills=_skills
-                    ).start()
-                )
+                print("==> starting worker with skills:", _skills)
+                await self.start_worker(_llama, _skills)
                 _workers_created.append(_llama)
             else:
                 _workers_skipped.append(_llama)
+        print("WORKERS", self.workers)
+
         print(f"INFO: {len(_workers_created)} queue worker created: {_workers_created}")
         print(f"INFO: {len(_workers_skipped)} queue worker skipped: {_workers_skipped}")
 
@@ -128,6 +145,16 @@ class Herder:
             _response = await client.post(
                 url=_url, headers=_headers, data=json.dumps(data)
             )
+        await self.load_llamas()
+        if data["node_key"] in self.workers:
+            print("stopping worker:", data["node_key"])
+            print(self.workers)
+            await self.stop_worker(data["node_key"])
+        await self.start_worker(
+            data["node_key"], self.llamas[data["node_key"]]["mapped_prompts"]
+        )
+        print("POST SWITCH WORKERS:", self.workers)
+        print("POST SWITCH PROMPTS:", self.llamas[data["node_key"]]["mapped_prompts"])
         return _response
 
     async def infer(self, data: dict):
@@ -139,7 +166,11 @@ class Herder:
         else:
             data["infer_input"] = data["raw_input"]
 
+        # node candidates from roles
         _allowed_nodes = self.roles[self.users[data["user_key"]]["role"]]["allow_nodes"]
+        print("allowed nodes raw", _allowed_nodes)
+
+        # node candidates from prompt settings
 
         # Wrapper for queue
         async def send_request(data, node_key):
@@ -161,7 +192,7 @@ class Herder:
         # wait for queue complete event and pick up results
         try:
             await asyncio.wait_for(
-                self.task_queue.result_events[task_id].wait(), timeout=60 * 5
+                self.task_queue.result_events[task_id].wait(), timeout=30  # 60 * 5
             )
             node_key, response = self.task_queue.results.pop(task_id)
             status_code = 200

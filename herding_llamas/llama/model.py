@@ -1,7 +1,5 @@
 import torch
 from transformers import (
-    AutoTokenizer,
-    AutoModelForCausalLM,
     StoppingCriteria,
     StoppingCriteriaList,
 )
@@ -28,41 +26,12 @@ class StoppingCriteriaSub(StoppingCriteria):
 class ModelLoaders:
     def load(self, model_key):
         self.model_conf = self.conf["models"][model_key]
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_conf["path"])
-        if self.model_conf.get("custom_loader", "default") == "default":
-            self.load_default(model_key)
-        if self.model_conf.get("custom_loader", "default") == "load_gptq":
-            self.load_gptq(model_key)
-        if self.model_conf.get("custom_loader", "default") == "4bit":
-            self.load_4bit(model_key)
+        custom_loader = self.model_conf.get("custom_loader", "default")
 
-    def load_default(self, model_key):
-        self.model = AutoModelForCausalLM.from_pretrained(self.model_conf["path"])
-        return {"loaded": model_key}
-
-    def load_4bit(self, model_key):
-        self.model = AutoModelForCausalLM.from_pretrained(
-            self.model_conf["path"],
-            trust_remote_code=self.model_conf.get("trust_remote_code", False),
-            load_in_4bit=True,
-            device_map="auto",
-        )
-        return {"loaded": model_key}
-
-    def load_gptq(self, model_key, use_triton=False):
-        from auto_gptq import AutoGPTQForCausalLM, BaseQuantizeConfig
-        import argparse
-
-        self.model = AutoGPTQForCausalLM.from_quantized(
-            self.model_conf["path"],
-            model_basename=self.model_conf.get("basename", None),
-            use_safetensors=True,
-            trust_remote_code=False,
-            device="cuda:0",
-            use_triton=use_triton,
-            quantize_config=None,
-        )
-        return {"loaded": model_key}
+        # Dynamic loading of custom loaders
+        module = __import__(f"loaders.{custom_loader}", fromlist=[custom_loader])
+        load_func = getattr(module, custom_loader)
+        return load_func(self, model_key)
 
 
 class LanguageModel(ModelLoaders):

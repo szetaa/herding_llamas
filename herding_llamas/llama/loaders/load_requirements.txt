@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+xmltodict
+transformers
+torch
+auto-gptq>=0.3.1
+# git+https://github.com/PanQiWei/AutoGPTQ.git
+

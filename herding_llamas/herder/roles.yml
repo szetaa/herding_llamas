@@ -14,6 +14,8 @@ admin:
   allow_prompts:
     - llama_2_plain_vanilla
     - llama_2_keep_it_short
+    - llama_2_entity_recognition
+    - llama_2_scattergories
   allow_tabs:
     - Prompts
     - Nodes
@@ -31,6 +33,8 @@ admin:
     allow_prompts:
       - llama_2_keep_it_short
       - llama_2_plain_vanilla
+      - llama_2_entity_recognition
+      - llama_2_scattergories
     allow_tabs:
       - Prompts
       - OwnHistory

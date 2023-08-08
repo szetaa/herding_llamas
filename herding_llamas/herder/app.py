@@ -20,16 +20,16 @@ from herder import Herder
 
 
 app = FastAPI()
+herder_instance = None
 
-
-herder: Herder
+# herder: Herder
 
 
 @app.on_event("startup")
 async def startup():
     logging.basicConfig(level=logging.INFO)
-    global herder
-    herder = await Herder.create()
+    global herder_instance
+    herder_instance = await Herder.create()
     app.mount("/UI", StaticFiles(directory="UI"), name="UI")
     # background_tasks = BackgroundTasks()
     # background_tasks.add_task(herder.refresh)  # Start the refresh loop
@@ -46,7 +46,7 @@ class User(BaseModel):
 
 
 def authenticate_token(token: str = Depends(oauth2_scheme)):
-    for user_key, user_data in herder.users.items():
+    for user_key, user_data in herder_instance.users.items():
         if user_data["token"] == token:
             _user = User(
                 user_key=user_key,
@@ -68,7 +68,9 @@ async def authorize_token(
     prompt_key=None,
     api_path=None,
 ):
-    authorized = herder.authorize(user=user, prompt_key=prompt_key, api_path=api_path)
+    authorized = herder_instance.authorize(
+        user=user, prompt_key=prompt_key, api_path=api_path
+    )
     if authorized["authorized"]:
         return user
     else:
@@ -113,7 +115,7 @@ def authorize_endpoint(func):
 @app.get("/api/v1/allowed_tabs")
 @authorize_endpoint
 async def api_allowed_tabs(request: Request):
-    allowed_tabs = herder.roles[request.state.user.user_key]["allow_tabs"]
+    allowed_tabs = herder_instance.roles[request.state.user.user_key]["allow_tabs"]
     return allowed_tabs
 
 
@@ -137,8 +139,9 @@ async def api_get_llamas(request: Request):
         HTTPException: If the user is not authorized to access this endpoint.
 
     """
-    await herder.load_llamas()
-    return herder.llamas
+    herder_instance.llamas = await herder_instance.load_llamas()
+    print(herder_instance.llamas)
+    return herder_instance.llamas
 
 
 @app.get("/api/v1/prompts")
@@ -162,9 +165,14 @@ async def api_get_prompts(request: Request):
         HTTPException: If the user is not authorized to access this endpoint.
 
     """
+    _allowed_prompts = herder_instance.roles[request.state.user.user_key][
+        "allow_prompts"
+    ]
     _prompts = [
         {"prompt": key, "name": key}  # value["name"]}
-        for key, value in herder.prompter.prompts.items()
+        for key, value in herder_instance.prompter.prompts.items()
+        if key in herder_instance.roles[request.state.user.user_key]["allow_prompts"]
+        and key in _allowed_prompts
     ]
     return {"prompts": _prompts}
 
@@ -199,7 +207,7 @@ async def api_post_infer(request: Request, data: dict):
 
     """
     data["user_key"] = request.state.user.user_key
-    response, inference_id, status_code = await herder.infer(data)
+    response, inference_id, status_code = await herder_instance.infer(data)
 
     if status_code == 200:
         response_data = {
@@ -236,7 +244,7 @@ async def api_score(request: Request, data: dict):
         HTTPException: If the user is not authorized to access this endpoint.
 
     """
-    herder.database.update_inference(data["inference_id"], data)
+    herder_instance.database.update_inference(data["inference_id"], data)
 
 
 @app.post("/api/v1/feedback")
@@ -260,7 +268,7 @@ async def api_feedback(request: Request, data: dict):
         HTTPException: If the user is not authorized to access this endpoint.
 
     """
-    herder.database.update_inference(data["inference_id"], data)
+    herder_instance.database.update_inference(data["inference_id"], data)
 
 
 @app.get("/api/v1/history")
@@ -284,7 +292,7 @@ async def api_get_history(request: Request):
         HTTPException: If the user is not authorized to access this endpoint.
 
     """
-    history = herder.database.list_inference()
+    history = herder_instance.database.list_inference()
     return history
 
 
@@ -309,5 +317,5 @@ async def api_switch_model(request: Request, data: dict):
     Raises:
         HTTPException: If the user is not authorized to access this endpoint.
     """
-    response = await herder.switch_model(data)
+    response = await herder_instance.switch_model(data)
     return response.json()
