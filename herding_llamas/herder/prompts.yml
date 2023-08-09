@@ -1,5 +1,6 @@
 llama_2_keep_it_short:
-  name: Llama 2 instruction to keep it short..
+  name: Llama 2 expecting short answer
+  description: Llama 2 instruction to keep it short..
   target_models: [BlokeMetaLlama2_GPTQ]
   version: 1.0
   prompt: |-
@@ -11,9 +12,11 @@ llama_2_keep_it_short:
     [/INST]
   param:
     temperature: 0.7
+    asdf: 2
 
 llama_2_entity_recognition:
   name: Llama 2 entity recognition
+  description: Provide a list of classes (e.g., [persons, places, food]) followed by a text. The model will try to return a JSON object with all found objects mapped to the respective class.
   target_models: [BlokeMetaLlama2_GPTQ]
   version: 1.0
   prompt: |-

@@ -15,6 +15,7 @@ import logging
 import yaml
 import requests
 import json
+import pprint
 
 from herder import Herder
 
@@ -140,7 +141,7 @@ async def api_get_llamas(request: Request):
 
     """
     herder_instance.llamas = await herder_instance.load_llamas()
-    print(herder_instance.llamas)
+    # pprint.pprint(herder_instance.llamas)
     return herder_instance.llamas
 
 
@@ -168,13 +169,35 @@ async def api_get_prompts(request: Request):
     _allowed_prompts = herder_instance.roles[request.state.user.user_key][
         "allow_prompts"
     ]
-    _prompts = [
+    _allowed_nodes = herder_instance.roles[request.state.user.user_key]["allow_nodes"]
+    _prompt_options = [
         {"prompt": key, "name": key}  # value["name"]}
         for key, value in herder_instance.prompter.prompts.items()
-        if key in herder_instance.roles[request.state.user.user_key]["allow_prompts"]
-        and key in _allowed_prompts
+        if key in _allowed_prompts
     ]
-    return {"prompts": _prompts}
+
+    _full_prompts = herder_instance.prompter.prompts
+    for p_k, p_v in _full_prompts.items():
+        # Check if user is allowed to use prompt
+        _full_prompts[p_k]["allowed"] = p_k in _allowed_prompts
+
+        # Check which available nodes are mapped to the prompt (and can be used)
+        _full_prompts[p_k]["allowed_nodes"] = [
+            n_k
+            for n_k, n_v in herder_instance.llamas.items()
+            if p_k in n_v["mapped_prompts"] and n_k in _allowed_nodes
+        ]
+        # Check which available nodes are mapped to the prompt (and can NOT be used)
+        _full_prompts[p_k]["not_allowed_nodes"] = [
+            n_k
+            for n_k, n_v in herder_instance.llamas.items()
+            if p_k in n_v["mapped_prompts"] and n_k not in _allowed_nodes
+        ]
+
+    return {
+        "prompt_options": _prompt_options,
+        "full_prompts": _full_prompts,
+    }
 
 
 @app.post("/api/v1/infer")

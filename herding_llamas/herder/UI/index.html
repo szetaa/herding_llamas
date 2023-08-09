@@ -4,7 +4,8 @@
 <head>
     <title>Admin Interface</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
+
 
     <link href="app.css" rel="stylesheet">
 </head>
@@ -12,12 +13,13 @@
 <body>
     <div class="container py-1">
         <div class="tabs">
-            <button class="tablink btn btn-outline-primary" id="tabPrompts">Prompt Engineer</button>
+            <button class="tablink btn btn-outline-primary" id="tabPromptEngineer">Prompt Engineer</button>
+            <button class="tablink btn btn-outline-primary" id="tabPrompts">Prompts</button>
             <button class="tablink btn btn-outline-primary" id="tabNodes">Nodes</button>
             <button class="tablink btn btn-outline-primary" id="tabHistory">History</button>
             <button class="tablink btn btn-outline-primary" id="tabOwnHistory">Own History</button>
 
-            <div id="viewPrompts" class="tabcontent">
+            <div id="viewPromptEngineer" class="tabcontent">
                 <h4>Prompt Engineer</h4>
                 <div id="inputForm" class="d-flex flex-column mt-0">
                     <textarea id="userInput" class="form-control mb-2" rows="3"
@@ -45,6 +47,11 @@
                         <div id="model-card-container"></div>
                     </div>
                 </div>
+            </div>
+
+            <div id="viewPrompts" class="tabcontent">
+                <h4>Prompts</h4>
+                <div id="promptsContainer" class="container"></div>
             </div>
 
             <div id="viewHistory" class="tabcontent">

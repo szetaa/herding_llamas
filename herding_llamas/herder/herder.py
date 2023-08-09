@@ -128,12 +128,12 @@ class Herder:
         for _llama, value in self.llamas.items():
             if len(value.get("mapped_prompts", [])) > 0:
                 _skills = value["mapped_prompts"]
-                print("==> starting worker with skills:", _skills)
+                # print("==> starting worker with skills:", _skills)
                 await self.start_worker(_llama, _skills)
                 _workers_created.append(_llama)
             else:
                 _workers_skipped.append(_llama)
-        print("WORKERS", self.workers)
+        # print("WORKERS", self.workers)
 
         print(f"INFO: {len(_workers_created)} queue worker created: {_workers_created}")
         print(f"INFO: {len(_workers_skipped)} queue worker skipped: {_workers_skipped}")
@@ -148,13 +148,13 @@ class Herder:
         await self.load_llamas()
         if data["node_key"] in self.workers:
             print("stopping worker:", data["node_key"])
-            print(self.workers)
+            # print(self.workers)
             await self.stop_worker(data["node_key"])
         await self.start_worker(
             data["node_key"], self.llamas[data["node_key"]]["mapped_prompts"]
         )
-        print("POST SWITCH WORKERS:", self.workers)
-        print("POST SWITCH PROMPTS:", self.llamas[data["node_key"]]["mapped_prompts"])
+        # print("POST SWITCH WORKERS:", self.workers)
+        # print("POST SWITCH PROMPTS:", self.llamas[data["node_key"]]["mapped_prompts"])
         return _response
 
     async def infer(self, data: dict):

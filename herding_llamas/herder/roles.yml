@@ -17,6 +17,7 @@ admin:
     - llama_2_entity_recognition
     - llama_2_scattergories
   allow_tabs:
+    - PromptEngineer
     - Prompts
     - Nodes
     - History
@@ -36,5 +37,6 @@ admin:
       - llama_2_entity_recognition
       - llama_2_scattergories
     allow_tabs:
-      - Prompts
+      - PromptEngineer
       - OwnHistory
+      - Prompts

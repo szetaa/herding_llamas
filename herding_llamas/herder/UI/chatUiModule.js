@@ -10,6 +10,7 @@ export default class ChatUI {
         this.modelCardContainer = document.getElementById('model-card-container');
         this.promptSelect = document.getElementById('promptSelect');
         this.historyContainer = document.getElementById('historyContainer');
+        this.promptsContainer = document.getElementById('promptsContainer');
         this.chatWindow = document.getElementById('chatWindow');
         this.userInput = document.getElementById('userInput');
         this.sendButton = document.getElementById('sendButton');
@@ -18,11 +19,10 @@ export default class ChatUI {
     }
 
     async init() {
-        this.populateNodesDropdown();
-        this.populatePromptsDropdown();
+        //this.populateNodesDropdown();
+        this.populatePromptEngineerDropdown();
         this.listenToMessages();
     }
-
 
     async populateNodesDropdown() {
         const nodes = await this.chatAPI.fetchNodes();
@@ -55,14 +55,15 @@ export default class ChatUI {
             document.getElementById(`tab${tab}`).style.display = 'inline-block'
             document.getElementById(`tab${tab}`).addEventListener('click', () => {
                 this.openTab(`view${tab}`)
-                tab == 'Prompt' && this.populatePromptsDropdown()
+                tab == 'PromptEngineer' && this.populatePromptEngineerDropdown()
+                tab == 'Prompts' && this.populatePrompts()
                 tab == 'Nodes' && this.populateNodesDropdown()
                 tab == 'History' && this.populateHistory()
                 tab == 'OwnHistory' && this.populateHistory()
             })
         })
 
-        document.getElementById('tabPrompts').click();
+        document.getElementById('tabPromptEngineer').click();
     }
 
 
@@ -98,16 +99,44 @@ export default class ChatUI {
     }
 
 
-    async populatePromptsDropdown() {
+    async populatePromptEngineerDropdown() {
         const data = await this.chatAPI.getPrompts();
         this.promptSelect.innerHTML = ''
-        data.prompts.forEach(prompt => {
+        data.prompt_options.forEach(prompt => {
             const option = document.createElement('option');
             option.value = prompt.prompt;
             option.textContent = prompt.name;
             this.promptSelect.appendChild(option);
         });
     }
+
+    async populatePrompts() {
+        const prompts = await this.chatAPI.getPrompts();
+        this.promptsContainer.innerHTML = '';
+        const promptsArray = Object.values(prompts.full_prompts);
+
+        // Fetch the template
+        fetch('./templates/prompts_table.mustache')
+            .then(response => response.text())
+            .then(template => {
+                // Prepare the data for Mustache
+                const view = {
+                    prompts: Object.entries(prompts.full_prompts).map(([promptKey, promptValue]) => ({
+                        key: promptKey,
+                        ...promptValue,
+                        parameter: promptValue.param
+                            ? Object.entries(promptValue.param).map(([key, value]) => `${key}: ${value}`).join('\n')
+                            : ''
+                    })),
+                };
+                // Render the template with Mustache
+                const rendered = Mustache.render(template, view);
+
+                // Append the rendered HTML to the historyContainer
+                this.promptsContainer.innerHTML = rendered;
+            });
+    }
+
 
     async populateHistory() {
         const data = await this.chatAPI.getHistory();
