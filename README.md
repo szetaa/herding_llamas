@@ -19,6 +19,9 @@ A scalable API framework for orchestrating prompt-engineered solutions involving
 - Define limits per consuming app or user/role
 - **Scale!**
 
+<img src="./doc/diagram_pencil.jpg" width="50%" border="1">
+
+
 ## Motivation
 With better generations of open source LLMs becoming available for personal and commercial use at the current pace, organizations and even private persons start to recognize them as an alternative or extension to products like ChatGPT and Bard. 
 
