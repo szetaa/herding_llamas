@@ -3,6 +3,7 @@
 A scalable API framework for orchestrating prompt-engineered solutions involving Large Language Models (LLMs), aiming to lower the entry hurdle for experimentation across teams while cutting time and complexity involved in launching (and integrating) a new idea.
 
 ***Recent updates***
+- *[9-Aug-2023]* **Modularize [loaders](./herding_llamas/llama/loaders/)** (currently default transformers and GPTQ covered) and some cleanups.
 - *[8-Aug-2023]* **Task queue** added for LLM inference. Only workers (registered Llama nodes) in the allow-list of the requestor can pick up the task.
 - *[6-Aug-2023]* **Allow to set limits**. E.g., restrict access to some Llama nodes to a user group, or based on max requests / processed input/output tokens over a given time window.
 
