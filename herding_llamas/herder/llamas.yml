@@ -3,7 +3,7 @@ together_ai_instance:
   host: localhost
   port: 8095
   base_url: http://localhost:8095 # custom API wrapper for https://api.together.xyz
-  API_KEY_NAME: TOGETHER_TOKEN
+  API_KEY_NAME: TOGETHER_TOKEN # 
 node_one:
   node_type: herding_llamas
   host: localhost

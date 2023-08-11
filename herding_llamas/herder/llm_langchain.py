@@ -2,6 +2,7 @@ from langchain.llms.base import LLM
 from typing import Optional, List, Mapping, Any
 import json
 import requests
+import os
 
 # assuming server with custom API (llm_api project) started.
 URI = "http://localhost:8090/api/v1/infer"
@@ -14,7 +15,7 @@ class LlmLangchain(LLM):
 
     def _call(self, prompt: str, stop: Optional[List[str]] = None) -> str:
         stop_words = ["Observation", "\nObservation:", "\nObservations:"]
-        if isinstance(stop, list) and len(stop > 0):
+        if isinstance(stop, list) and len(stop) > 0:
             stop_words = stop_words + stop
 
         param = {
@@ -41,7 +42,12 @@ class LlmLangchain(LLM):
             "param": param,
         }
 
-        response = requests.post(URI, data=json.dumps(payload))
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {os.environ.get('HERDING_LLAMAS_USER_TOKEN')}",
+        }
+
+        response = requests.post(URI, headers=headers, data=json.dumps(payload))
 
         response.raise_for_status()
         return response.json()

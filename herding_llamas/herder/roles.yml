@@ -17,6 +17,7 @@ admin:
     - llama_2_keep_it_short
     - llama_2_entity_recognition
     - llama_2_scattergories
+    - llama_2_langchain
     - together_test
   allow_tabs:
     - PromptEngineer
