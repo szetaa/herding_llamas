@@ -1,6 +1,5 @@
 
-API_KEY_NAME: llm-key
-API_KEY: secret123
+API_KEY_NAME: HERDING_LLAMAS_SECRET # system variable name holding the secret between herder and Llamas
 startup_model: BlokeMetaLlama2_GPTQ
 
 models:

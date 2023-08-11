@@ -3,6 +3,7 @@ import pprint
 import requests
 import httpx
 import json
+import os
 from urllib.parse import urlparse
 import asyncio
 
@@ -19,6 +20,7 @@ class Herder:
         self.database = database
         self.workers = {}
         self.task_queue = task_queue
+        # self.get_header("node_one")
 
     # async classmethod to serve as an alternative constructor.
     @classmethod
@@ -83,7 +85,7 @@ class Herder:
         for _llama in self.llamas.copy():
             try:
                 _url = f"{self.conf[_llama]['base_url']}/api/v1/models"
-                _headers = self.get_header(_llama)
+                _headers = self.get_header(self.conf[_llama])
                 async with httpx.AsyncClient() as client:
                     _models = await client.get(_url, headers=_headers)
                 self.llamas[_llama]["models"] = _models.json()["models"]
@@ -140,7 +142,7 @@ class Herder:
 
     async def switch_model(self, data: dict):
         _url = f"{self.conf[data['node_key']]['base_url']}/api/v1/load_model"
-        _headers = self.get_header(data["node_key"])
+        _headers = self.get_header(self.conf[data["node_key"]])
         async with httpx.AsyncClient(timeout=30.0) as client:
             _response = await client.post(
                 url=_url, headers=_headers, data=json.dumps(data)
@@ -158,13 +160,7 @@ class Herder:
         return _response
 
     async def infer(self, data: dict):
-        if data.get("prompt_key") is not None:
-            data["infer_input"] = self.prompter.render_prompt(
-                prompt_key=data["prompt_key"], text=data["raw_input"]
-            )
-            data["param"] = self.prompter.prompts[data["prompt_key"]].get("param", None)
-        else:
-            data["infer_input"] = data["raw_input"]
+        self.prompter.prepare_request(data)
 
         # node candidates from roles
         _allowed_nodes = self.roles[self.users[data["user_key"]]["role"]]["allow_nodes"]
@@ -173,9 +169,12 @@ class Herder:
         # node candidates from prompt settings
 
         # Wrapper for queue
+        # node_key is injected through lambda function from picking up worker!
+        # worker_id == node_key
         async def send_request(data, node_key):
-            url = f'{self.llamas[node_key]["base_url"]}/api/v1/infer'
-            headers = self.get_header(node_key)
+            _node_conf = self.llamas[node_key]
+            url = f'{_node_conf["base_url"]}{_node_conf.get("infer_path","/api/v1/infer")}'
+            headers = self.get_header(self.llamas[node_key])
             async with httpx.AsyncClient(timeout=120.0) as client:
                 response = await client.post(
                     url=url, headers=headers, data=json.dumps(data)
@@ -221,5 +220,7 @@ class Herder:
 
         return response, db_inference_id, status_code
 
-    def get_header(self, llama: str):
-        return {self.conf[llama]["API_KEY_NAME"]: self.conf[llama]["API_KEY"]}
+    def get_header(self, llama: dict):
+        API_KEY_NAME = llama["API_KEY_NAME"]
+        API_KEY = os.environ.get(API_KEY_NAME)
+        return {API_KEY_NAME: API_KEY}

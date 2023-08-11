@@ -2,6 +2,7 @@ admin:
   allow_nodes:
     - node_one
     - node_two
+    - together_ai_instance
   allow_api_paths: 
     - /api/v1/infer
     - /api/v1/score
@@ -16,6 +17,7 @@ admin:
     - llama_2_keep_it_short
     - llama_2_entity_recognition
     - llama_2_scattergories
+    - together_test
   allow_tabs:
     - PromptEngineer
     - Prompts

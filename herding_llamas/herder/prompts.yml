@@ -12,7 +12,6 @@ llama_2_keep_it_short:
     [/INST]
   param:
     temperature: 0.7
-    asdf: 2
 
 llama_2_entity_recognition:
   name: Llama 2 entity recognition
@@ -47,6 +46,16 @@ llama_2_scattergories:
   param: 
     temperature: 0.7
 
+together_test:
+  name: Together AI test
+  description: Test for inference with Together AI
+  target_models: ['togethercomputer/RedPajama-INCITE-7B-Chat']
+  version: 1.0
+  prompt: |-
+    Question:
+    {{text}}
+    Answer:
+
 llama_2_python_interpreter:
   name: Llama 2 Python interpreter
   target_models: [BlokeMetaLlama2_GPTQ]
@@ -76,6 +85,7 @@ llama_2_plain_vanilla:
     [/INST]
   param:
     temperature: 0.7
+
 llama_2_summarizer:
   name: Llama 2 summarizer
   target_models: [BlokeMetaLlama2_GPTQ]
@@ -87,6 +97,7 @@ llama_2_summarizer:
     <</SYS>>
     {{text}}
     [/INST]
+
 llama_2_langchain:
   name: Llama 2 prompt for use with Langchain
   target_models: [BlokeMetaLlama2_GPTQ]

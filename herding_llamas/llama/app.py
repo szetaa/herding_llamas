@@ -4,6 +4,7 @@ from starlette.requests import Request
 import logging
 import yaml
 import pprint
+import os
 
 from model import LanguageModel
 from sys_stats import SystemStats
@@ -28,7 +29,7 @@ app = FastAPI()
 # router = APIRouter()
 
 API_KEY_NAME = llama.conf["API_KEY_NAME"]
-API_KEY = llama.conf["API_KEY"]
+API_KEY = os.environ.get(API_KEY_NAME)
 
 
 def get_api_key(request: Request):

@@ -1,12 +1,18 @@
+together_ai_instance:
+  node_type: together_ai
+  host: localhost
+  port: 8095
+  base_url: http://localhost:8095 # custom API wrapper for https://api.together.xyz
+  API_KEY_NAME: TOGETHER_TOKEN
 node_one:
+  node_type: herding_llamas
   host: localhost
   port: 8081
   base_url: http://localhost:8081
-  API_KEY_NAME: llm-key
-  API_KEY: secret123
+  API_KEY_NAME: HERDING_LLAMAS_SECRET
 node_two:
+  node_type: herding_llamas
   host: localhost
   port: 8082
   base_url: http://localhost:8082
-  API_KEY_NAME: llm-key
-  API_KEY: secret123
+  API_KEY_NAME: HERDING_LLAMAS_SECRET

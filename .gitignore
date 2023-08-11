@@ -5,4 +5,4 @@ herder.sqlite
 nohup.out
 .DS_Store
 experiments
-
+export_secrets.sh
