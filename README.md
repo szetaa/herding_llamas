@@ -90,13 +90,13 @@ New prompts can be published through the same API, and mapped to user groups (e.
 ## Llama nodes 
 Monitor the utilization and health of all your registered Llama nodes and dynamically switch the loaded model.
 
-<img src="./doc/nodes_overview_tab.png" width="100%">
+<img src="./doc/nodes_overview_tab.png" width="75%">
 *Llama overview*
 
 ## Request history
 See a history of recent prompts incl. statistics (user waiting time, number of tokens processed etc.).
 
-<img src="./doc/history_tab.png" width="75%">
+<img src="./doc/history_tab.png" width="100%">
 *Example history record from the internal database with statistics*
 
 Users/apps can opt-out from keeping a history of their prompt content.
