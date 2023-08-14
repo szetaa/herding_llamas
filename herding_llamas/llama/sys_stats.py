@@ -73,7 +73,7 @@ class SystemStats:
         system_load = round(os.getloadavg()[0], 2)  # Get 1-minute load average
 
         # CPU utilization
-        cpu_utilization = psutil.cpu_percent(interval=1)
+        cpu_utilization = psutil.cpu_percent(interval=0.5)
 
         # Swap usage
         swap_info = psutil.swap_memory()

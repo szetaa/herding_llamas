@@ -112,4 +112,5 @@ class LanguageModel(ModelLoaders):
             "input_tokens": num_input_tokens,
             "output_tokens": num_output_tokens,
             "elapsed_seconds": elapsed_seconds,
+            "model_name": self.loaded_model,
         }

@@ -15,33 +15,22 @@
         <div class="tabs">
             <button class="tablink btn btn-outline-primary" id="tabPromptEngineer">Prompt Engineer</button>
             <button class="tablink btn btn-outline-primary" id="tabPrompts">Prompts</button>
-            <button class="tablink btn btn-outline-primary" id="tabNodes">Nodes</button>
+            <button class="tablink btn btn-outline-primary" id="tabNodes">Llamas</button>
             <button class="tablink btn btn-outline-primary" id="tabHistory">History</button>
             <button class="tablink btn btn-outline-primary" id="tabOwnHistory">Own History</button>
 
             <div id="viewPromptEngineer" class="tabcontent">
                 <h4>Prompt Engineer</h4>
-                <div id="inputForm" class="d-flex flex-column mt-0">
-                    <textarea id="userInput" class="form-control mb-2" rows="3"
-                        placeholder="Type your message here..."></textarea>
-                    <div class="input-group">
-                        <button id="sendButton" class="btn btn-outline-secondary form-control-lg"
-                            type="button">Send</button>
-                        <div id="loadingSpinner" class="spinner-border text-primary" role="status"
-                            style="display: none;">
-                            <span class="sr-only">Loading...</span>
-                        </div>
-                        <select id="promptSelect" class="form-select form-control-lg">
-                            <!-- Options will be added dynamically -->
-                        </select>
-
-                    </div>
-                </div>
+                <select id="promptSelect" class="form-select form-control-lg">
+                    <!-- Options will be added dynamically -->
+                </select>
+                <div id="promptForm"></div>
                 <div id="chatWindow" class="mt-5"></div>
             </div>
 
             <div id="viewNodes" class="tabcontent">
-                <h4>Registered Nodes</h4>
+                <h4>Registered Llamas</h4>
+                <button class="tablink btn btn-outline-primary" id="start_workers">(Re-) Start all queues</button>
                 <div class="row">
                     <div class="col-8">
                         <div id="model-card-container"></div>

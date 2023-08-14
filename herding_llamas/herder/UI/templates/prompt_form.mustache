@@ -1,0 +1,19 @@
+<div id="inputForm" class="d-flex flex-column mt-0">
+
+{{#variables}}
+<label for="{{key}}"><b>{{key}}</b></label>
+<textarea id="{{key}}" name="{{key}}" rows="4" cols="50" class="variables">{{value}}</textarea>
+<br>
+{{/variables}}
+
+
+    <div class="input-group">
+        <button id="sendButton" class="btn btn-outline-secondary form-control-lg"
+            type="button">Send</button>
+        <div id="loadingSpinner" class="spinner-border text-primary" role="status"
+            style="display: none;">
+            <span class="sr-only">Loading...</span>
+        </div>
+
+    </div>
+</div>

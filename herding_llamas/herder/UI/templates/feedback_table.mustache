@@ -7,12 +7,15 @@
     {{#data}}
         <tr>
             <td>
-                <b>Node</b><br>{{node_key}}<br>
-                <b>User</b><br>{{user_key}}<br>
-                <b>Prompt</b><br>{{prompt_key}}<br>
-                <b>Stats</b> (token;time)<br>{{input_tokens}}/{{output_tokens}}; {{elapsed_seconds}}s<br>
-                <b>Created</b><br>{{created_ts}}<br>
-                <b>Updated</b><br>{{updated_ts}}
+                <table class="table table-compact">
+                    <tr><th>Node</th><td>{{node_key}}</td></tr>
+                    <tr><th>Model</th><td>{{model_name}}</td></tr>
+                    <tr><th>User</th><td>{{user_key}}</td></tr>
+                    <tr><th>Prompt</th><td>{{prompt_key}}</td></tr>
+                    <tr><th>Stats</th><td>{{input_tokens}}/{{output_tokens}}; {{elapsed_seconds}}s</td></tr>
+                    <tr><th>Created</th><td>{{created_ts}}</td></tr>
+                    <tr><th>Updated</th><td>{{updated_ts}}</td></tr>
+                </table>
             </td>
             <td>{{raw_input}}</td>
             <td><pre>{{infer_input}}</pre></td>

@@ -6,28 +6,52 @@ import time
 
 app = FastAPI()
 
+app.state.TARGET_MODEL = "togethercomputer/llama-2-13b"
+
+BASE_URL = "https://api.together.xyz"
+headers = {
+    "accept": "application/json",
+    "content-type": "application/json",
+    "Authorization": f"Bearer {os.environ.get('TOGETHER_TOKEN')}",
+}
+
 
 @app.get("/api/v1/models")
 def api_together_models():
+    url = f"{BASE_URL}/instances"
+    print(app.state.TARGET_MODEL)
+
+    response = requests.get(url, headers=headers)
+    response_json = response.json()
+
     result = {
         "models": [
-            {"option": "togethercomputer/RedPajama-INCITE-7B-Chat", "selected": True},
+            {"option": key, "selected": key == app.state.TARGET_MODEL}
+            for (key, value) in response_json.items()
+            if value == True
         ],
-        "loaded_model": "togethercomputer/RedPajama-INCITE-7B-Chat",
-        "system_stats": {},
+        "loaded_model": app.state.TARGET_MODEL,
+        "system_stats": None,
     }
     return result
 
 
+@app.post("/api/v1/load_model")
+async def api_load_model(data: dict):
+    app.state.TARGET_MODEL = data["model_key"]
+    print("changed target model to", app.state.TARGET_MODEL)
+    return {"loaded": app.state.TARGET_MODEL}
+
+
 @app.post("/api/v1/infer")
 def api_together_infer(data: dict):
-    url = "https://api.together.xyz/inference"
+    url = f"{BASE_URL}/inference"
 
     payload = {
-        "model": "togethercomputer/RedPajama-INCITE-7B-Instruct",
+        "model": app.state.TARGET_MODEL,
         "prompt": data["infer_input"],
-        "max_tokens": 128,
-        "stop": ["Question:"],
+        "max_tokens": 20,
+        "stop": ["\n:"],
         "temperature": 0.7,
         "top_p": 0.7,
         "top_k": 50,
@@ -43,7 +67,7 @@ def api_together_infer(data: dict):
 
     response = requests.post(url, json=payload, headers=headers)
     response_json = response.json()
-    pprint.pprint(response_json["output"]["raw_compute_time"])
+
     end_time = time.time()
     elapsed_seconds = end_time - start_time
 
@@ -51,6 +75,7 @@ def api_together_infer(data: dict):
     data["output_tokens"] = 0
     data["elapsed_seconds"] = elapsed_seconds
     data["response"] = response_json["output"]["choices"][0]["text"].strip()
+    data["model_name"] = response_json["model"]
 
     # _response = llama.infer(data=data)
     return data

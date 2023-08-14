@@ -15,7 +15,7 @@ export default class ChatAPI {
 
     async fetchAllowedTabs() {
         let token = this.get_or_set_token();
-        const response = await fetch('/api/v1/allowed_tabs', {
+        const response = await fetch(this.apiURL + '/allowed_tabs', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -54,6 +54,19 @@ export default class ChatAPI {
         return await response.json();
     }
 
+    async startWorkers() {
+        let token = this.get_or_set_token();
+        const response = await fetch(this.apiURL + "/start_workers", {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            }
+        });
+        return await response.json();
+    }
+
+
     async getPrompts() {
         let token = this.get_or_set_token();
         const response = await fetch(this.apiURL + "/prompts", {
@@ -79,7 +92,7 @@ export default class ChatAPI {
     }
 
 
-    async postMessage(message, prompt_key) {
+    async postMessage(messageData, prompt_key) {
         let token = this.get_or_set_token();
         const response = await fetch(this.apiURL + '/infer', {
             method: 'POST',
@@ -88,7 +101,7 @@ export default class ChatAPI {
                 'Authorization': `Bearer ${token}`,
             },
             body: JSON.stringify({
-                raw_input: message,
+                raw_inputs: messageData,
                 prompt_key: prompt_key
             })
         });

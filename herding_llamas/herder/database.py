@@ -29,9 +29,10 @@ class Inference(Base):
 
     id = Column(String(32), primary_key=True, default=lambda: uuid.uuid4().hex)
     node_key = Column(String(255))
+    model_name = Column(String(255))
     prompt_key = Column(String(255))
-    prompt_version = Column(String(5))
-    user_key = Column(String(50))
+    prompt_version = Column(String(255))
+    user_key = Column(String(255))
     raw_input = Column(Text)
     infer_input = Column(Text)
     response = Column(Text)

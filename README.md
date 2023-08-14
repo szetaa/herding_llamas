@@ -3,6 +3,7 @@
 A scalable API framework for orchestrating prompt-engineered solutions involving Large Language Models (LLMs), aiming to lower the entry hurdle for experimentation across teams while cutting time and complexity involved in launching (and integrating) a new idea.
 
 ***Recent updates***
+- *[13-Aug-2023]* **Wrappers to external services** (example added: [api.together.xyz](https://api.together.xyz/)), **enhanced prompt stucture** with dynamic variables, and better prompt overview (new tab), many bug fixes.
 - *[9-Aug-2023]* **Modularize [loaders](./herding_llamas/llama/loaders/)** (currently default transformers and GPTQ covered) and some cleanups.
 - *[8-Aug-2023]* **Task queue** added for LLM inference. Only workers (registered Llama nodes) in the allow-list of the requestor can pick up the task.
 - *[6-Aug-2023]* **Allow to set limits**. E.g., restrict access to some Llama nodes to a user group, or based on max requests / processed input/output tokens over a given time window.
@@ -10,13 +11,13 @@ A scalable API framework for orchestrating prompt-engineered solutions involving
 
 # Introduction
 ## Vision
-- Build and orchestrate your own pool **Large Language Models** *(LLM)*
-- Off-the-shelf (e.g., [hf.co](https://huggingface.co/spaces/HuggingFaceH4/open_llm_leaderboard)) or fine-tuned to your needs
+- Build and orchestrate your own pool of **Large Language Models** *(LLM)*
+- Off-the-shelf (e.g., [hf.co](https://huggingface.co/spaces/HuggingFaceH4/open_llm_leaderboard)), fine-tuned to your needs, or externally hosted (e.g., https://api.together.xyz)
 - Register and hot-swap new backend models (typially a GPU-powered computation instance running a LLM)
 - **Develop and manage your repository of** model-specific **prompts** *(e.g., natural language, code understanding)* and **chains**
 - Serve everything through **one central REST API** (*and hand out access tokens to users/applications*)
-- **Monitor and and channel utilization**
-- Define limits per consuming app or user/role
+- **Monitor and channel utilization**
+- Define **limits** per consuming app or user/role
 - **Scale!**
 
 <img src="./doc/diagram_pencil.jpg" width="50%" border="1">
@@ -38,25 +39,33 @@ With the ability to map prompts directly to your intended audience, whether this
 ## Prompt engineering
 Engineer interface to test and develop new prompts.
 
-New prompts are immediately available through the same API, and can be mapped to user groups (e.g., test / production, or teams/applications with bespoke requirements)
+New prompts can be published through the same API, and mapped to user groups (e.g., test / production, or teams/applications with bespoke requirements)
+
+Prompt engineering from the examples (incl. user feedback form)
 
 <img src="./doc/prompt_engineer_tab.png" width="50%">
 
-*Coming soon: Overwrite default parameters like temperature (measure of creativity), custom stop-words etc.*
+Overview tab to explore prompts:
+
+<img src="./doc/prompt_overview_tab.png" width="50%">
+
+Prompt details: 
+
+<img src="./doc/prompt_detail.png" width="50%">
+
+*Coming soon: **example API call** for copy/paste integration into other applications.*
 
 ## Llama nodes 
 Monitor the utilization and health of all your registered Llama nodes and dynamically switch the loaded model.
 
-<img src="./doc/nodes_tab.png" width="50%">
-
-*Coming soon: Statistics of requests/tokens processed per hour, heatmap*
+<img src="./doc/nodes_overview_tab.png" width="50%">
 
 ## Request history
 See a history of recent prompts incl. statistics (user waiting time, number of tokens processed etc.).
 
 <img src="./doc/history_tab.png" width="75%">
 
-*Coming soon: Users can opt-out on keeping a history of their prompt content.*
+Users/apps can opt-out from keeping a history of their prompt content.
 
 ## Token based access
 Hand out access-tokens to every user (-group) or application. The same token can be used for API requests or direclty in the web UI for experimentation / prompt engineering.
@@ -133,11 +142,14 @@ Interactive exploration, call and test your API directly from the browser
 ## Nodes (Llamas)
 1. Clone this repository to your nodes
 1. Update [conf.yml](./herding_llamas/llama/conf.yml) to your needs by adding models that should be loadable on each node. Set your custom `API_KEY` as secret between the node and the orchestrator
+1. Set the token as system variable **HERDING_LLAMAS_SECRET**
 1. Run `./herding_llamas/llama/startup.sh` (change the `port` if needed)
 ## Orchestrator (Herder)
 1. Clone this repository to your orchestrator
-1. Add your prompts to [prompts.yml](./herding_llamas/herder/prompts.yml)
+1. Customize your prompts to [prompts.yml](./herding_llamas/herder/prompts.yml)
 1. Register your nodes in [llamas.yml](./herding_llamas/herder/llamas.yml)
+1. Set the token as system variable **HERDING_LLAMAS_SECRET**
+1. Set the token for 3rd party hosted models as system variables (as defined in `llamas.yml`)
 1. Run `./herding_llamas/herder/startup.sh` (change the `port` if needed)
 
 
@@ -147,7 +159,7 @@ Interactive exploration, call and test your API directly from the browser
   - [x] Set limits per user (number of requests/tokens per hour)
 - [ ] Dynamically switch models on nodes, based on observed demand
 - [x] Queuing mechanism for requests
-- [ ] Improve error handling and logging
+- [x] Allow to use 3rd party hosted models through API wrappers
 - [ ] Allow to add modules / plugins (e.g., personal vector stores / chat with your data, reasoning, ...)
 
 As this project is still in earl stage, the roadmap will likley be subject to frequent change.

@@ -1,8 +1,8 @@
 admin:
   allow_nodes:
-    - node_one
-    - node_two
-    - together_ai_instance
+    - self_hosted_one
+    - self_hosted_two
+    - together_ai_one
   allow_api_paths: 
     - /api/v1/infer
     - /api/v1/score
@@ -12,6 +12,7 @@ admin:
     - /api/v1/history
     - /api/v1/switch_model
     - /api/v1/allowed_tabs
+    - /api/v1/start_workers
   allow_prompts:
     - llama_2_plain_vanilla
     - llama_2_keep_it_short
@@ -25,21 +26,23 @@ admin:
     - Nodes
     - History
     - OwnHistory
-  user_group_A:
-    allow_nodes:
-      - node_one
-    allow_api_paths:
-      - /api/v1/infer
-      - /api/v1/prompts
-      - /api/v1/score
-      - /api/v1/feedback
-      - /api/v1/allowed_tabs
-    allow_prompts:
-      - llama_2_keep_it_short
-      - llama_2_plain_vanilla
-      - llama_2_entity_recognition
-      - llama_2_scattergories
-    allow_tabs:
-      - PromptEngineer
-      - OwnHistory
-      - Prompts
+user_group_A:
+  allow_nodes:
+    - self_hosted_one
+    - self_hosted_two
+    - together_ai_one
+  allow_api_paths:
+    - /api/v1/infer
+    - /api/v1/prompts
+    - /api/v1/score
+    - /api/v1/feedback
+    - /api/v1/allowed_tabs
+  allow_prompts:
+    - llama_2_keep_it_short
+    - llama_2_plain_vanilla
+    - llama_2_entity_recognition
+    - llama_2_scattergories
+  allow_tabs:
+    - PromptEngineer
+    - OwnHistory
+    - Prompts

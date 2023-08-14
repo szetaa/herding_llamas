@@ -13,25 +13,13 @@ from llm_queue import TaskQueue, Worker
 
 
 class Herder:
-    def __init__(self, prompter, database, task_queue):
+    def __init__(self):  # , prompter, database, task_queue):
         self.load_users()
         self.load_roles()
-        self.prompter = prompter
-        self.database = database
+        self.prompter = Prompter()
+        self.database = Database(db_url="sqlite:///herder.sqlite")
         self.workers = {}
-        self.task_queue = task_queue
-        # self.get_header("node_one")
-
-    # async classmethod to serve as an alternative constructor.
-    @classmethod
-    async def create(cls):
-        prompter = Prompter()
-        database = Database(db_url="sqlite:///herder.sqlite")
-        task_queue = TaskQueue()
-        herder = cls(prompter, database, task_queue)
-        await herder.load_llamas()
-        await herder.start_workers()
-        return herder
+        self.task_queue = TaskQueue()
 
     def load_users(self):
         with open("users.yml", "r") as f:
@@ -77,46 +65,53 @@ class Herder:
         # Finally
         return {"authorized": True}
 
-    async def load_llamas(self):
+    async def load_llamas(self, load_stats=True):
         with open("llamas.yml") as f:
             self.conf = yaml.safe_load(f)
         self.llamas = self.conf
-        _llama_stats = self.database.get_node_statistics()
-        for _llama in self.llamas.copy():
-            try:
-                _url = f"{self.conf[_llama]['base_url']}/api/v1/models"
-                _headers = self.get_header(self.conf[_llama])
-                async with httpx.AsyncClient() as client:
-                    _models = await client.get(_url, headers=_headers)
-                self.llamas[_llama]["models"] = _models.json()["models"]
-                self.llamas[_llama]["loaded_model"] = _models.json()["loaded_model"]
-                self.llamas[_llama]["system_stats"] = _models.json().get(
-                    "system_stats", {}
-                )
-                self.llamas[_llama]["infer_stats"] = _llama_stats.get(_llama, {})
-                self.llamas[_llama]["mapped_prompts"] = [
-                    key
-                    for key, value in self.prompter.prompts.items()
-                    if self.llamas[_llama]["loaded_model"] in value["target_models"]
-                ]
-            except Exception as e:
-                print(f"WARNING: Could not fetch '{_llama}': {e}")
-                self.llamas[_llama]["models"] = [{"option": "offline?"}]
-                self.llamas[_llama]["loaded_model"] = "offline?"
-                self.llamas[_llama]["system_stats"] = {}
-                self.llamas[_llama]["infer_stats"] = {}
-                self.llamas[_llama]["mapped_prompts"] = []
+        if load_stats:
+            _llama_stats = self.database.get_node_statistics()
+            for _llama in self.llamas.copy():
+                print("loading llama", _llama)
+                try:
+                    _url = f"{self.conf[_llama]['base_url']}/api/v1/models"
+                    _headers = self.get_header(self.conf[_llama])
+                    async with httpx.AsyncClient() as client:
+                        _models = await client.get(_url, headers=_headers)
+                    _models_json = _models.json()
+                    self.llamas[_llama]["models"] = _models_json["models"]
+                    self.llamas[_llama]["loaded_model"] = _models_json["loaded_model"]
+                    self.llamas[_llama]["system_stats"] = _models_json.get(
+                        "system_stats", {}
+                    )
+                    self.llamas[_llama]["infer_stats"] = _llama_stats.get(_llama, {})
+                    self.llamas[_llama]["worker_started"] = _llama in self.workers
+                    self.llamas[_llama]["mapped_prompts"] = [
+                        key
+                        for key, value in self.prompter.prompts.items()
+                        if self.llamas[_llama]["loaded_model"] in value["target_models"]
+                    ]
+                except Exception as e:
+                    print(f"WARNING: Could not fetch '{_llama}': {e}")
+                    self.llamas[_llama]["models"] = [{"option": "offline?"}]
+                    self.llamas[_llama]["loaded_model"] = "offline?"
+                    self.llamas[_llama]["system_stats"] = {}
+                    self.llamas[_llama]["infer_stats"] = {}
+                    self.llamas[_llama]["mapped_prompts"] = []
         return self.llamas
 
     async def start_worker(self, worker_id, skills):
+        print("workers before:", [w for w in self.workers])
+        print(f"INFO: Starting worker '{worker_id}' listening to prompts: {skills}")
         if worker_id in self.workers:
-            self.stop_worker(worker_id)
+            await self.stop_worker(worker_id)
         task = asyncio.create_task(
             Worker(
                 worker_id=worker_id, task_queue=self.task_queue, skills=skills
             ).start()
         )
         self.workers[worker_id] = task
+        print("workers after:", [w for w in self.workers])
 
     async def stop_worker(self, worker_id):
         task = self.workers.get(worker_id)
@@ -144,9 +139,7 @@ class Herder:
         _url = f"{self.conf[data['node_key']]['base_url']}/api/v1/load_model"
         _headers = self.get_header(self.conf[data["node_key"]])
         async with httpx.AsyncClient(timeout=30.0) as client:
-            _response = await client.post(
-                url=_url, headers=_headers, data=json.dumps(data)
-            )
+            _response = await client.post(url=_url, headers=_headers, json=data)
         await self.load_llamas()
         if data["node_key"] in self.workers:
             print("stopping worker:", data["node_key"])
@@ -176,9 +169,7 @@ class Herder:
             url = f'{_node_conf["base_url"]}{_node_conf.get("infer_path","/api/v1/infer")}'
             headers = self.get_header(self.llamas[node_key])
             async with httpx.AsyncClient(timeout=120.0) as client:
-                response = await client.post(
-                    url=url, headers=headers, data=json.dumps(data)
-                )
+                response = await client.post(url=url, headers=headers, json=data)
             return node_key, response
 
         # Adding request to queue
@@ -204,15 +195,19 @@ class Herder:
         mask_history = self.users[data["user_key"]].get(
             "opt_out_history_content", False
         )
+        response_json = response.json()
         db_inference_record = {
             "user_key": data.get("user_key", "unknown"),
             "node_key": node_key,
+            "model_name": response_json.get("model_name"),
             "prompt_key": data.get("prompt_key", "unknown"),
             "prompt_version": "TBD",
-            "input_tokens": response.json()["input_tokens"],
-            "output_tokens": response.json()["output_tokens"],
-            "elapsed_seconds": response.json()["elapsed_seconds"],
-            "raw_input": data["raw_input"] if not mask_history else "masked",
+            "input_tokens": response_json.get("input_tokens", 0),
+            "output_tokens": response_json.get("output_tokens", 0),
+            "elapsed_seconds": response_json.get("elapsed_seconds", 0),
+            "raw_input": json.dumps(data["raw_inputs"])
+            if not mask_history
+            else "masked",
             "infer_input": data["infer_input"] if not mask_history else "masked",
             "response": response.json()["response"] if not mask_history else "masked",
         }

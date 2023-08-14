@@ -1,7 +1,10 @@
 <div class="card">
     <div class="card-body">
-        <div class="node-name"><h4>{{nodeName}}</h4></div>
-        Switch model:
+        <div class="row">
+            <div class="col"><div class="node-name"><h4>Llama: <i>{{nodeName}}</i></h4></div></div>
+            <div class="col">Queue active: <b>{{worker_started}}</b></div>
+        </div>
+        Switch model: 
         <select class="custom-select">
             {{#models}}
             <option value="{{name}}" {{#selected}}selected{{/selected}}>{{name}}</option>
@@ -32,6 +35,7 @@
         </table>
     </div>
 </div>
+{{#system_stats}}
 <div class="row">
     <div class="col">
         <table class="table table-sm sysinfo-table table-borderless">
@@ -83,6 +87,7 @@
         </table>
     </div>
 </div>
+{{/system_stats}}
 
 
     </div>
