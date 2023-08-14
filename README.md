@@ -77,12 +77,15 @@ As a prompt written and tested to work well with a given model (e.g., Llama-2), 
 New prompts can be published through the same API, and mapped to user groups (e.g., test / production, or teams/applications with bespoke requirements)
 
 <img src="./doc/prompt_engineer_tab.png" width="75%">
+
 *Prompt engineering from the examples (incl. user feedback form)*
 
 <img src="./doc/prompt_overview_tab.png" width="75%">
+
 *Overview tab to explore prompts*
 
 <img src="./doc/prompt_detail.png" width="75%">
+
 *Prompt details*
 
 *Coming soon: **example API call** for copy/paste integration into other applications.*
@@ -91,12 +94,14 @@ New prompts can be published through the same API, and mapped to user groups (e.
 Monitor the utilization and health of all your registered Llama nodes and dynamically switch the loaded model.
 
 <img src="./doc/nodes_overview_tab.png" width="75%">
+
 *Llama overview*
 
 ## Request history
 See a history of recent prompts incl. statistics (user waiting time, number of tokens processed etc.).
 
 <img src="./doc/history_tab.png" width="100%">
+
 *Example history record from the internal database with statistics*
 
 Users/apps can opt-out from keeping a history of their prompt content.
