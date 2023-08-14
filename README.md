@@ -76,13 +76,13 @@ As a prompt written and tested to work well with a given model (e.g., Llama-2), 
 
 New prompts can be published through the same API, and mapped to user groups (e.g., test / production, or teams/applications with bespoke requirements)
 
-<img src="./doc/prompt_engineer_tab.png" width="50%">
+<img src="./doc/prompt_engineer_tab.png" width="75%">
 *Prompt engineering from the examples (incl. user feedback form)*
 
-<img src="./doc/prompt_overview_tab.png" width="50%">
+<img src="./doc/prompt_overview_tab.png" width="75%">
 *Overview tab to explore prompts*
 
-<img src="./doc/prompt_detail.png" width="50%">
+<img src="./doc/prompt_detail.png" width="75%">
 *Prompt details*
 
 *Coming soon: **example API call** for copy/paste integration into other applications.*
@@ -90,7 +90,7 @@ New prompts can be published through the same API, and mapped to user groups (e.
 ## Llama nodes 
 Monitor the utilization and health of all your registered Llama nodes and dynamically switch the loaded model.
 
-<img src="./doc/nodes_overview_tab.png" width="50%">
+<img src="./doc/nodes_overview_tab.png" width="100%">
 *Llama overview*
 
 ## Request history
