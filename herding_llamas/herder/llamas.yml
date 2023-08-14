@@ -2,14 +2,13 @@ together_ai_one:
   node_type: together_ai
   host: localhost
   port: 8095
-  #base_url: http://localhost:8095 # custom API wrapper for https://api.together.xyz
-  base_url: http://localhost:8090/service_together_one
+  base_url: http://localhost:8090/service_together_one # custom API wrapper redirecting to https://api.together.xyz
   API_KEY_NAME: TOGETHER_TOKEN # 
 self_hosted_one:
   node_type: herding_llamas
   host: localhost
   port: 8081
-  base_url: http://localhost:8081
+  base_url: http://localhost:8081 # this self-hosted Llama happens to run on the same host as the herder
   API_KEY_NAME: HERDING_LLAMAS_SECRET
 self_hosted_two:
   node_type: herding_llamas

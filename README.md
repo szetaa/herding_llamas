@@ -39,19 +39,51 @@ With the ability to map prompts directly to your intended audience, whether this
 ## Prompt engineering
 Engineer interface to test and develop new prompts.
 
+Your prompts are the key ingredient for herding-llamas. 
+
+For each prompt, you can define input variables (at least one free text), and those variables are expanded in the prompt itself (e.g., `{{system_message}}`, `{{text}}`). 
+
+The user interface reacts dynamically to the selected prompt.
+
+Please note that for a user request throught he API, not all variables are required (nor desired). If omitted, herding-llamas will default e.g., the `system_message` to what is defined by the prompt engineer (i.e., stored to prompts.yml)
+
+```yaml
+llama_2_entity_recognition:
+  name: Llama 2 entity recognition
+  description: Provide a list of classes (e.g., [persons, places, food]) followed by a text. The model will return a JSON object with all found objects mapped to the respective class.
+  target_models: 
+    - TheBloke/Llama-2-13B-chat-GPTQ
+  version: 1.0
+  variables:
+    - system_message: |-
+        You are an intelligent and helpful expert [etc.]
+    - categories: "[person, year, food]"
+    - text: Hanna's favorite dish was sushi, until in 2022 she met Josephine who showed how to prepare very good falafel.
+  prompt: |-
+    [INST]
+    <<SYS>>
+    {{system_message}}
+    <</SYS>>
+    {{categories}}
+    {{text}}
+    [/INST]
+  param:
+    temperature: 0.1
+
+```
+
+As a prompt written and tested to work well with a given model (e.g., Llama-2), it may perform poorly with another model (e.g., RedPajama). Therefore you can map any prompt to a list of target models. This makes sure, that user requests to your prompt are not sent to a wrong Llama backend. 
+
 New prompts can be published through the same API, and mapped to user groups (e.g., test / production, or teams/applications with bespoke requirements)
 
-Prompt engineering from the examples (incl. user feedback form)
-
 <img src="./doc/prompt_engineer_tab.png" width="50%">
-
-Overview tab to explore prompts:
+*Prompt engineering from the examples (incl. user feedback form)*
 
 <img src="./doc/prompt_overview_tab.png" width="50%">
-
-Prompt details: 
+*Overview tab to explore prompts*
 
 <img src="./doc/prompt_detail.png" width="50%">
+*Prompt details*
 
 *Coming soon: **example API call** for copy/paste integration into other applications.*
 
@@ -59,11 +91,13 @@ Prompt details:
 Monitor the utilization and health of all your registered Llama nodes and dynamically switch the loaded model.
 
 <img src="./doc/nodes_overview_tab.png" width="50%">
+*Llama overview*
 
 ## Request history
 See a history of recent prompts incl. statistics (user waiting time, number of tokens processed etc.).
 
 <img src="./doc/history_tab.png" width="75%">
+*Example history record from the internal database with statistics*
 
 Users/apps can opt-out from keeping a history of their prompt content.
 
@@ -86,15 +120,16 @@ Example setting for a typical group of users who engineer their own prompts and 
 ```yaml
 user_group_A:
   allow_nodes: # Decides to which Llama nodes requests from group A can be sent to.
-    - node_one
+    - self_hosted_one
+    - together_ai_one
   allow_api_paths:
-    - /api/v1/infer
-    - /api/v1/prompts
-    - /api/v1/score
-    - /api/v1/feedback
+    - /api/v1/infer # send request
+    - /api/v1/prompts # list and explore prompts
+    - /api/v1/score # Score (1-5 stars) a given response
+    - /api/v1/feedback # Provide verbal feedback to a given response
   allow_prompts:
     - llama_2_keep_it_short
-    - llama_2_plain_vanilla
+    - llama_2_scattergories
   allow_tabs:
     - Prompts
     - OwnHistory
